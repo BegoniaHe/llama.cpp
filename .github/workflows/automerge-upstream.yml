@@ -1,0 +1,107 @@
+name: Auto-merge Upstream
+
+on:
+  schedule:
+    # 每6小时检查一次上游更新
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/ggml-org/llama.cpp.git || true
+          git remote set-url upstream https://github.com/ggml-org/llama.cpp.git
+
+      - name: Fetch upstream
+        run: git fetch upstream master
+
+      - name: Check for merge conflicts
+        id: check_merge
+        run: |
+          # Try to merge the upstream master
+          if git merge --no-commit --no-ff upstream/master; then
+            echo "merge_possible=true" >> $GITHUB_OUTPUT
+            echo "conflict=false" >> $GITHUB_OUTPUT
+            # Reset the merge since we're just checking
+            git merge --abort
+          else
+            echo "merge_possible=false" >> $GITHUB_OUTPUT
+            echo "conflict=true" >> $GITHUB_OUTPUT
+            # Reset the merge
+            git merge --abort
+          fi
+
+      - name: Auto-merge upstream
+        if: steps.check_merge.outputs.merge_possible == 'true'
+        run: |
+          git merge upstream/master --no-edit
+          git push origin master
+
+      - name: Create issue if merge conflicts
+        if: steps.check_merge.outputs.conflict == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['upstream-conflict']
+            });
+
+            if (existingIssues.data.length === 0) {
+              github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Upstream merge conflict detected',
+                body: `Automatic merge from upstream (ggml-org/llama.cpp) failed due to conflicts.\n\nPlease manually resolve the conflicts:\n\n\`\`\`bash\ngit fetch upstream master\ngit merge upstream/master\n# Resolve conflicts\ngit add .\ngit commit -m "Merge upstream llama.cpp"\ngit push origin master\n\`\`\``,
+                labels: ['upstream-conflict']
+              });
+            }
+
+      - name: Comment on issue when resolved
+        if: steps.check_merge.outputs.merge_possible == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['upstream-conflict']
+            });
+
+            if (issues.data.length > 0) {
+              for (const issue of issues.data) {
+                github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: 'Upstream has been successfully merged! Closing this issue.'
+                });
+                github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              }
+            }
