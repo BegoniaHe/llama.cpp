@@ -407,12 +407,35 @@ static best_fattn_kernel ggml_cuda_get_best_fattn_kernel(const int device, const
         return BEST_FATTN_KERNEL_MMA_F16;
     }
 
-    // Use the WMMA kernel if possible:
-    if (ggml_cuda_should_use_wmma_fattn(cc) && K->ne[1] % FATTN_KQ_STRIDE == 0 && Q->ne[0] != 40 && Q->ne[0] != 72 && Q->ne[0] != 576) {
+    // For HIP+rocWMMA: detect single-token decode and skip WMMA (fallthrough to HIP VEC/TILE)
+#if defined(GGML_USE_HIP) && defined(GGML_HIP_ROCWMMA_FATTN)
+    const bool hip_wmma_decode = ggml_cuda_should_use_wmma_fattn(cc) && (Q->ne[1] == 1);
+#else
+    const bool hip_wmma_decode = false;
+#endif
+
+    // Use the WMMA kernel if possible (not for single-token decode on HIP):
+    if (ggml_cuda_should_use_wmma_fattn(cc) && !hip_wmma_decode && K->ne[1] % FATTN_KQ_STRIDE == 0 && Q->ne[0] != 40 && Q->ne[0] != 72 && Q->ne[0] != 576) {
         if (can_use_vector_kernel && Q->ne[1] <= 2) {
             return BEST_FATTN_KERNEL_VEC;
         }
         return BEST_FATTN_KERNEL_WMMA_F16;
+    }
+
+    // HIP+rocWMMA decode safety guard: if TILE config unavailable, use VEC to avoid device abort
+    if (hip_wmma_decode) {
+        // Compute ncols as regular HIP selection would (see fallback logic below)
+        int gqa_ratio_eff = 1;
+        const int ncols2_max = Q->ne[0] == 576 ? 16 : 8;
+        while (gqa_ratio % (2*gqa_ratio_eff) == 0 && gqa_ratio_eff < ncols2_max) {
+            gqa_ratio_eff *= 2;
+        }
+        const int ncols2 = gqa_opt_applies ? gqa_ratio_eff : 1;
+        const int ncols  = Q->ne[1] * ncols2; // Q->ne[1] == 1 for decode
+        if (ggml_cuda_fattn_tile_get_config(Q->ne[0], V->ne[0], ncols, cc) == 0) {
+            return BEST_FATTN_KERNEL_VEC; // No TILE config: safe fallback
+        }
+        // TILE config exists; fall through to normal HIP selection
     }
 
     if (amd_wmma_available(cc) && GGML_CUDA_CC_IS_RDNA4(cc) && gqa_opt_applies && Q->ne[0] <= 128 && Q->ne[0] != 40 && Q->ne[0] != 72) {
