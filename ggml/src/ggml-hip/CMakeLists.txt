@@ -56,6 +56,24 @@ message(STATUS "HIP and hipBLAS found")
 # Workaround old compilers
 set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} --gpu-max-threads-per-block=1024")
 
+# Architecture-specific HIP compilation optimizations for rocWMMA and standard HIP builds
+# These flags are applied based on the target GPU architecture to improve performance
+if(CMAKE_HIP_ARCHITECTURES)
+    foreach(ARCH ${CMAKE_HIP_ARCHITECTURES})
+        # CDNA architectures: gfx908 (MI100), gfx90a (MI200), gfx942 (MI300)
+        if(ARCH MATCHES "^(gfx908|gfx90a|gfx942)$")
+            # -mno-cumode: Disables CUDA mode emulation, uses native RDNA/CDNA features
+            set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -mno-cumode")
+        # RDNA architectures: gfx1010/1012 (RDNA1), gfx1030+ (RDNA2), gfx11xx (RDNA3/3.5), gfx12xx (RDNA4)
+        elseif(ARCH MATCHES "^(gfx101[02]|gfx103[0-7]|gfx11[0-9a-f]{2}|gfx12[0-9a-f]{2})$")
+            # -mwavefrontsize=32: Forces 32-wide waves on RDNA (vs 64-wide on CDNA) for better occupancy
+            set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -mwavefrontsize=32")
+        endif()
+    endforeach()
+endif()
+
+message(STATUS "HIP compilation flags: ${CMAKE_HIP_FLAGS}")
+
 file(GLOB   GGML_HEADERS_ROCM "../ggml-cuda/*.cuh")
 list(APPEND GGML_HEADERS_ROCM "../../include/ggml-cuda.h")
 
