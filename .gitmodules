@@ -4,3 +4,6 @@
 [submodule "reference/open-webui"]
 	path = reference/open-webui
 	url = https://github.com/open-webui/open-webui
+[submodule "reference/paraglide-js"]
+	path = reference/paraglide-js
+	url = https://github.com/opral/paraglide-js
