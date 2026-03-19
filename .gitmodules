@@ -1,3 +1,6 @@
 [submodule "reference/s2.cpp"]
 	path = reference/s2.cpp
 	url = https://github.com/rodrigomatta/s2.cpp
+[submodule "reference/open-webui"]
+	path = reference/open-webui
+	url = https://github.com/open-webui/open-webui
