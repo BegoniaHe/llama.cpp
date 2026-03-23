@@ -53,9 +53,6 @@ endif()
 
 message(STATUS "HIP and hipBLAS found")
 
-# Workaround old compilers
-set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} --gpu-max-threads-per-block=1024")
-
 # Architecture-specific HIP compilation optimizations for rocWMMA and standard HIP builds
 # These flags are applied based on the target GPU architecture to improve performance
 if(CMAKE_HIP_ARCHITECTURES)
@@ -73,7 +70,6 @@ if(CMAKE_HIP_ARCHITECTURES)
 endif()
 
 message(STATUS "HIP compilation flags: ${CMAKE_HIP_FLAGS}")
-
 file(GLOB   GGML_HEADERS_ROCM "../ggml-cuda/*.cuh")
 list(APPEND GGML_HEADERS_ROCM "../../include/ggml-cuda.h")
 
@@ -92,12 +88,11 @@ if (GGML_CUDA_FA_ALL_QUANTS)
     list(APPEND GGML_SOURCES_ROCM ${SRCS})
     add_compile_definitions(GGML_CUDA_FA_ALL_QUANTS)
 else()
-    file(GLOB   SRCS "../ggml-cuda/template-instances/fattn-vec*q4_0-q4_0.cu")
-    list(APPEND GGML_SOURCES_ROCM ${SRCS})
-    file(GLOB   SRCS "../ggml-cuda/template-instances/fattn-vec*q8_0-q8_0.cu")
-    list(APPEND GGML_SOURCES_ROCM ${SRCS})
-    file(GLOB   SRCS "../ggml-cuda/template-instances/fattn-vec*f16-f16.cu")
-    list(APPEND GGML_SOURCES_ROCM ${SRCS})
+    list(APPEND GGML_SOURCES_ROCM
+        ../ggml-cuda/template-instances/fattn-vec-instance-f16-f16.cu
+        ../ggml-cuda/template-instances/fattn-vec-instance-q4_0-q4_0.cu
+        ../ggml-cuda/template-instances/fattn-vec-instance-q8_0-q8_0.cu
+        ../ggml-cuda/template-instances/fattn-vec-instance-bf16-bf16.cu)
 endif()
 
 ggml_add_backend_library(ggml-hip
@@ -150,6 +145,11 @@ endif()
 
 if (CXX_IS_HIPCC)
     set_source_files_properties(${GGML_SOURCES_ROCM} PROPERTIES LANGUAGE CXX)
+    if (WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+        # CMake on Windows doesn't support the HIP language yet.
+        # Therefore we workaround debug build's failure on HIP backend this way.
+        set_source_files_properties(${GGML_SOURCES_ROCM} PROPERTIES COMPILE_FLAGS "-O2 -g")
+    endif()
     target_link_libraries(ggml-hip PRIVATE hip::device)
 else()
     set_source_files_properties(${GGML_SOURCES_ROCM} PROPERTIES LANGUAGE HIP)
