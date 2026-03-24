@@ -1,17 +1,18 @@
 <script lang="ts">
-	import { RotateCcw, FlaskConical } from '@lucide/svelte';
+	import { ChatSettingsParameterSourceIndicator } from '$lib/components/app';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { SETTING_CONFIG_INFO, SETTINGS_KEYS } from '$lib/constants';
+	import { SETTINGS_KEYS } from '$lib/constants';
 	import { SettingsFieldType } from '$lib/enums/settings';
-	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { serverStore } from '$lib/stores/server.svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { modelsStore, selectedModelName } from '$lib/stores/models.svelte';
+	import { serverStore } from '$lib/stores/server.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { normalizeFloatingPoint } from '$lib/utils/precision';
-	import { ChatSettingsParameterSourceIndicator } from '$lib/components/app';
+	import { FlaskConical, RotateCcw } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 
 	interface Props {
@@ -79,7 +80,9 @@
 						onConfigChange(field.key, e.currentTarget.value);
 					}}
 					placeholder={sp[field.key] != null
-						? `Default: ${normalizeFloatingPoint(sp[field.key])}`
+							? m.settings_field_default_placeholder({
+									value: String(normalizeFloatingPoint(sp[field.key]))
+								})
 						: ''}
 					class="w-full {isCustomRealTime ? 'pr-8' : ''}"
 				/>
@@ -91,16 +94,16 @@
 							onConfigChange(field.key, '');
 						}}
 						class="absolute top-1/2 right-2 inline-flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded transition-colors hover:bg-muted"
-						aria-label="Reset to default"
-						title="Reset to default"
+						aria-label={m.settings_reset_to_default()}
+						title={m.settings_reset_to_default()}
 					>
 						<RotateCcw class="h-3 w-3" />
 					</button>
 				{/if}
 			</div>
-			{#if field.help || SETTING_CONFIG_INFO[field.key]}
+			{#if field.help}
 				<p class="mt-1 text-xs text-muted-foreground">
-					{@html field.help || SETTING_CONFIG_INFO[field.key]}
+					{@html field.help}
 				</p>
 			{/if}
 		{:else if field.type === SettingsFieldType.TEXTAREA}
@@ -120,9 +123,9 @@
 				class="min-h-[10rem] w-full md:max-w-2xl"
 			/>
 
-			{#if field.help || SETTING_CONFIG_INFO[field.key]}
+			{#if field.help}
 				<p class="mt-1 text-xs text-muted-foreground">
-					{field.help || SETTING_CONFIG_INFO[field.key]}
+					{field.help}
 				</p>
 			{/if}
 
@@ -135,7 +138,7 @@
 					/>
 
 					<Label for="showSystemMessage" class="cursor-pointer text-sm font-normal">
-						Show system message in conversations
+						{m.settings_show_system_message_in_conversations()}
 					</Label>
 				</div>
 			{/if}
@@ -184,7 +187,7 @@
 								<IconComponent class="h-4 w-4" />
 							{/if}
 
-							{selectedOption?.label || `Select ${field.label.toLowerCase()}`}
+							{selectedOption?.label || m.settings_select_field({ field: field.label })}
 						</div>
 					</Select.Trigger>
 					{#if isCustomRealTime}
@@ -195,8 +198,8 @@
 								onConfigChange(field.key, '');
 							}}
 							class="absolute top-1/2 right-8 inline-flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded transition-colors hover:bg-muted"
-							aria-label="Reset to default"
-							title="Reset to default"
+							aria-label={m.settings_reset_to_default()}
+							title={m.settings_reset_to_default()}
 						>
 							<RotateCcw class="h-3 w-3" />
 						</button>
@@ -218,9 +221,9 @@
 					{/if}
 				</Select.Content>
 			</Select.Root>
-			{#if field.help || SETTING_CONFIG_INFO[field.key]}
+			{#if field.help}
 				<p class="mt-1 text-xs text-muted-foreground">
-					{field.help || SETTING_CONFIG_INFO[field.key]}
+					{field.help}
 				</p>
 			{/if}
 		{:else if field.type === SettingsFieldType.CHECKBOX}
@@ -244,9 +247,9 @@
 						{/if}
 					</label>
 
-					{#if field.help || SETTING_CONFIG_INFO[field.key]}
+					{#if field.help}
 						<p class="text-xs text-muted-foreground">
-							{field.help || SETTING_CONFIG_INFO[field.key]}
+							{field.help}
 						</p>
 					{/if}
 				</div>

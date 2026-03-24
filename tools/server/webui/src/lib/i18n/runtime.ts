@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { m } from '$lib/paraglide/messages';
 import {
     baseLocale,
     getLocale,
@@ -35,7 +36,7 @@ function getLocaleDisplayName(locale: Locale): string {
 
 export function getLanguageOptions(): Array<{ value: string; label: string }> {
 	return [
-		{ value: SYSTEM_LANGUAGE_VALUE, label: 'System default' },
+		{ value: SYSTEM_LANGUAGE_VALUE, label: m.settings_language_system_default() },
 		...locales.map((locale) => ({
 			value: locale,
 			label: getLocaleDisplayName(locale)

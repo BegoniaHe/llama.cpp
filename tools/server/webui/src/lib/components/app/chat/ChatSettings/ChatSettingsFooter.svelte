@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Button } from '$lib/components/ui/button';
+	import { m } from '$lib/paraglide/messages';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { RotateCcw } from '@lucide/svelte';
 
@@ -34,26 +35,24 @@
 		<Button variant="outline" onclick={handleResetClick}>
 			<RotateCcw class="h-3 w-3" />
 
-			Reset to default
+			{m.settings_reset_to_default()}
 		</Button>
 	</div>
 
-	<Button onclick={handleSave}>Save settings</Button>
+	<Button onclick={handleSave}>{m.settings_save()}</Button>
 </div>
 
 <AlertDialog.Root bind:open={showResetDialog}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Reset Settings to Default</AlertDialog.Title>
+			<AlertDialog.Title>{m.settings_reset_dialog_title()}</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to reset all settings to their default values? This will reset all
-				parameters to the values provided by the server's /props endpoint and remove all your custom
-				configurations.
+				{m.settings_reset_dialog_description()}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleConfirmReset}>Reset to Default</AlertDialog.Action>
+			<AlertDialog.Cancel>{m.chat_sidebar_cancel()}</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={handleConfirmReset}>{m.settings_reset_to_default()}</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
