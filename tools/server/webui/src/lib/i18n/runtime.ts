@@ -1,14 +1,47 @@
 import { browser } from '$app/environment';
 import {
-	baseLocale,
-	getLocale,
-	getTextDirection,
-	locales,
-	setLocale,
-	type Locale
+    baseLocale,
+    getLocale,
+    getTextDirection,
+    localStorageKey,
+    locales,
+    setLocale,
+    type Locale
 } from '$lib/paraglide/runtime';
 
 let initialized = false;
+
+export const SYSTEM_LANGUAGE_VALUE = 'system';
+
+const LOCALE_LABELS: Partial<Record<Locale, string>> = {
+	en: 'English',
+	'zh-cn': '简体中文'
+};
+
+function getLocaleDisplayName(locale: Locale): string {
+	const explicitLabel = LOCALE_LABELS[locale];
+	if (explicitLabel) {
+		return explicitLabel;
+	}
+
+	try {
+		return (
+			new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale.toUpperCase()
+		);
+	} catch {
+		return locale.toUpperCase();
+	}
+}
+
+export function getLanguageOptions(): Array<{ value: string; label: string }> {
+	return [
+		{ value: SYSTEM_LANGUAGE_VALUE, label: 'System default' },
+		...locales.map((locale) => ({
+			value: locale,
+			label: getLocaleDisplayName(locale)
+		}))
+	];
+}
 
 function normalizeLocale(locale: string | undefined | null): Locale {
 	if (!locale) {
@@ -43,6 +76,19 @@ export function initializeI18n(): void {
 
 	initialized = true;
 	syncDocumentLocale();
+}
+
+export async function applyLocalePreference(preference?: string): Promise<Locale> {
+	if (!browser || !preference || preference === SYSTEM_LANGUAGE_VALUE) {
+		if (browser) {
+			localStorage.removeItem(localStorageKey);
+		}
+
+		syncDocumentLocale();
+		return getCurrentLocale();
+	}
+
+	return updateLocale(preference);
 }
 
 export async function updateLocale(locale: string): Promise<Locale> {

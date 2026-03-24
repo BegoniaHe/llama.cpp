@@ -1,34 +1,35 @@
 <script lang="ts">
 	import {
-		Settings,
-		Funnel,
-		AlertTriangle,
-		Code,
-		Monitor,
-		ChevronLeft,
-		ChevronRight,
-		Database
-	} from '@lucide/svelte';
-	import {
+		ChatSettingsFields,
 		ChatSettingsFooter,
 		ChatSettingsImportExportTab,
-		ChatSettingsFields,
 		McpLogo,
 		McpServersSettings
 	} from '$lib/components/app';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { config, settingsStore } from '$lib/stores/settings.svelte';
 	import {
-		SETTINGS_SECTION_TITLES,
-		type SettingsSectionTitle,
 		NUMERIC_FIELDS,
 		POSITIVE_INTEGER_FIELDS,
 		SETTINGS_COLOR_MODES_CONFIG,
-		SETTINGS_KEYS
+		SETTINGS_KEYS,
+		SETTINGS_SECTION_TITLES,
+		type SettingsSectionTitle
 	} from '$lib/constants';
-	import { setMode } from 'mode-watcher';
-	import { ColorMode } from '$lib/enums/ui';
 	import { SettingsFieldType } from '$lib/enums/settings';
+	import { ColorMode } from '$lib/enums/ui';
+	import { getLanguageOptions } from '$lib/i18n/runtime';
+	import { config, settingsStore } from '$lib/stores/settings.svelte';
+	import {
+		AlertTriangle,
+		ChevronLeft,
+		ChevronRight,
+		Code,
+		Database,
+		Funnel,
+		Monitor,
+		Settings
+	} from '@lucide/svelte';
+	import { setMode } from 'mode-watcher';
 	import type { Component } from 'svelte';
 
 	interface Props {
@@ -37,6 +38,7 @@
 	}
 
 	let { onSave, initialSection }: Props = $props();
+	const languageOptions = getLanguageOptions();
 
 	const settingSections: Array<{
 		fields: SettingsFieldConfig[];
@@ -52,6 +54,12 @@
 					label: 'Theme',
 					type: SettingsFieldType.SELECT,
 					options: SETTINGS_COLOR_MODES_CONFIG
+				},
+				{
+					key: SETTINGS_KEYS.LANGUAGE,
+					label: 'Language',
+					type: SettingsFieldType.SELECT,
+					options: languageOptions
 				},
 				{ key: SETTINGS_KEYS.API_KEY, label: 'API Key', type: SettingsFieldType.INPUT },
 				{

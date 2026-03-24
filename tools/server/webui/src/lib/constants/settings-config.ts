@@ -8,6 +8,7 @@ export const SETTING_CONFIG_DEFAULT: Record<string, string | number | boolean | 
 	systemMessage: '',
 	showSystemMessage: true,
 	theme: ColorMode.SYSTEM,
+	language: 'system',
 	showThoughtInProgress: false,
 	disableReasoningParsing: false,
 	showRawOutputSwitch: false,
@@ -66,6 +67,8 @@ export const SETTING_CONFIG_INFO: Record<string, string> = {
 	showSystemMessage: 'Display the system message at the top of each conversation.',
 	theme:
 		'Choose the color theme for the interface. You can choose between System (follows your device settings), Light, or Dark.',
+	language:
+		'Choose the language used by the WebUI. System follows your browser language when supported.',
 	pasteLongTextToFileLen:
 		'On pasting long text, it will be converted to a file. You can control the file length by setting the value of this parameter. Value 0 means disable.',
 	copyTextAttachmentsAsPlainText:

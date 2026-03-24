@@ -1,25 +1,25 @@
 <script lang="ts">
-	import '../app.css';
-	import { base } from '$app/paths';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
 	import { ChatSidebar, DialogConversationTitleUpdate } from '$lib/components/app';
-	import { isLoading } from '$lib/stores/chat.svelte';
-	import { conversationsStore, activeMessages } from '$lib/stores/conversations.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { isRouterMode, serverStore } from '$lib/stores/server.svelte';
-	import { config, settingsStore } from '$lib/stores/settings.svelte';
-	import { ModeWatcher } from 'mode-watcher';
-	import { Toaster } from 'svelte-sonner';
-	import { goto } from '$app/navigation';
-	import { modelsStore } from '$lib/stores/models.svelte';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { initializeI18n, syncDocumentLocale } from '$lib/i18n/runtime';
 	import { TOOLTIP_DELAY_DURATION } from '$lib/constants';
 	import { KeyboardKey } from '$lib/enums';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+	import { applyLocalePreference, initializeI18n } from '$lib/i18n/runtime';
+	import { isLoading } from '$lib/stores/chat.svelte';
+	import { activeMessages, conversationsStore } from '$lib/stores/conversations.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { modelsStore } from '$lib/stores/models.svelte';
+	import { isRouterMode, serverStore } from '$lib/stores/server.svelte';
+	import { config, settingsStore } from '$lib/stores/settings.svelte';
+	import { ModeWatcher } from 'mode-watcher';
+	import { untrack } from 'svelte';
+	import { Toaster } from 'svelte-sonner';
+	import '../app.css';
 
 	let { children } = $props();
 
@@ -89,7 +89,7 @@
 		if (!browser) return;
 
 		initializeI18n();
-		syncDocumentLocale();
+		void applyLocalePreference(config().language as string | undefined);
 	});
 
 	$effect(() => {
