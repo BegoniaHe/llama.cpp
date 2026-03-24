@@ -1,13 +1,14 @@
-import tailwindcss from '@tailwindcss/vite';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import * as fflate from 'fflate';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { defineConfig, searchForWorkspaceRoot } from 'vite';
 import devtoolsJson from 'vite-plugin-devtools-json';
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -109,7 +110,17 @@ export default defineConfig({
 			}
 		}
 	},
-	plugins: [tailwindcss(), sveltekit(), devtoolsJson(), llamaCppBuildPlugin()],
+	plugins: [
+		tailwindcss(),
+		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['localStorage', 'preferredLanguage', 'baseLocale']
+		}),
+		devtoolsJson(),
+		llamaCppBuildPlugin()
+	],
 	test: {
 		projects: [
 			{

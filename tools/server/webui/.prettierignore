@@ -7,3 +7,6 @@ bun.lockb
 
 # Miscellaneous
 /static/
+src/lib/paraglide/
+project.inlang/.meta.json
+project.inlang/README.md

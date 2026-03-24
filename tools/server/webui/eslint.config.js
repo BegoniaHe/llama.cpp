@@ -1,9 +1,9 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import storybook from 'eslint-plugin-storybook';
 
-import prettier from 'eslint-config-prettier';
 import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +19,9 @@ export default ts.config(
 	...svelte.configs.recommended,
 	prettier,
 	...svelte.configs.prettier,
+	{
+		ignores: ['src/lib/paraglide/**/*', 'project.inlang/.meta.json', 'project.inlang/README.md']
+	},
 	{
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node }

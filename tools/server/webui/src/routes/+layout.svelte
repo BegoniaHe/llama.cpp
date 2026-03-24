@@ -16,6 +16,7 @@
 	import { goto } from '$app/navigation';
 	import { modelsStore } from '$lib/stores/models.svelte';
 	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { initializeI18n, syncDocumentLocale } from '$lib/i18n/runtime';
 	import { TOOLTIP_DELAY_DURATION } from '$lib/constants';
 	import { KeyboardKey } from '$lib/enums';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
@@ -83,6 +84,13 @@
 			titleUpdateResolve = null;
 		}
 	}
+
+	$effect(() => {
+		if (!browser) return;
+
+		initializeI18n();
+		syncDocumentLocale();
+	});
 
 	$effect(() => {
 		if (alwaysShowSidebarOnDesktop && isDesktop) {
