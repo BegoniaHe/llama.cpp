@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import { ChatScreen, DialogModelNotAvailable } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { conversationsStore, isConversationsInitialized } from '$lib/stores/conversations.svelte';
-	import { modelsStore, modelOptions } from '$lib/stores/models.svelte';
+	import { modelOptions, modelsStore } from '$lib/stores/models.svelte';
 	import { isRouterMode } from '$lib/stores/server.svelte';
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
 
 	let qParam = $derived(page.url.searchParams.get('q'));
 	let modelParam = $derived(page.url.searchParams.get('model'));
@@ -87,7 +88,7 @@
 </script>
 
 <svelte:head>
-	<title>llama.cpp - AI Chat Interface</title>
+	<title>{m.app_title()}</title>
 </svelte:head>
 
 <ChatScreen showCenteredEmpty />

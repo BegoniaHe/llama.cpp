@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { goto, replaceState } from '$app/navigation';
+	import { afterNavigate, goto, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
-	import { afterNavigate } from '$app/navigation';
 	import { ChatScreen, DialogModelNotAvailable } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
 	import { chatStore, isLoading } from '$lib/stores/chat.svelte';
 	import {
-		conversationsStore,
 		activeConversation,
-		activeMessages
+		activeMessages,
+		conversationsStore
 	} from '$lib/stores/conversations.svelte';
-	import { modelsStore, modelOptions, selectedModelId } from '$lib/stores/models.svelte';
+	import { modelOptions, modelsStore, selectedModelId } from '$lib/stores/models.svelte';
 
 	let chatId = $derived(page.params.id);
 	let currentChatId: string | undefined = undefined;
@@ -166,7 +166,7 @@
 </script>
 
 <svelte:head>
-	<title>{activeConversation()?.name || 'Chat'} - llama.cpp</title>
+	<title>{m.app_title_chat({ title: activeConversation()?.name || 'Chat' })}</title>
 </svelte:head>
 
 <ChatScreen />

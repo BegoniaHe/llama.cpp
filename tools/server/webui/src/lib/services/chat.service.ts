@@ -1,20 +1,23 @@
-import { getJsonHeaders, formatAttachmentText, isAbortError } from '$lib/utils';
 import {
-	AGENTIC_REGEX,
-	ATTACHMENT_LABEL_PDF_FILE,
-	ATTACHMENT_LABEL_MCP_PROMPT,
-	ATTACHMENT_LABEL_MCP_RESOURCE
+    AGENTIC_REGEX,
+    ATTACHMENT_LABEL_FILE,
+    ATTACHMENT_LABEL_MCP_PROMPT,
+    ATTACHMENT_LABEL_MCP_RESOURCE,
+    ATTACHMENT_LABEL_PDF_FILE
 } from '$lib/constants';
 import {
-	AttachmentType,
-	ContentPartType,
-	MessageRole,
-	ReasoningFormat,
-	UrlProtocol
+    AttachmentType,
+    ContentPartType,
+    MessageRole,
+    ReasoningFormat,
+    UrlProtocol
 } from '$lib/enums';
-import type { ApiChatMessageContentPart, ApiChatCompletionToolCall } from '$lib/types/api';
-import type { DatabaseMessageExtraMcpPrompt, DatabaseMessageExtraMcpResource } from '$lib/types';
 import { modelsStore } from '$lib/stores/models.svelte';
+import type { DatabaseMessageExtraMcpPrompt, DatabaseMessageExtraMcpResource } from '$lib/types';
+import type { ApiChatCompletionToolCall, ApiChatMessageContentPart } from '$lib/types/api';
+import { isAbortError } from '$lib/utils/abort';
+import { getJsonHeaders } from '$lib/utils/api-headers';
+import { formatAttachmentText } from '$lib/utils/formatters';
 
 export class ChatService {
 	private static stripReasoningContent(
@@ -712,7 +715,7 @@ export class ChatService {
 		for (const textFile of textFiles) {
 			contentParts.push({
 				type: ContentPartType.TEXT,
-				text: formatAttachmentText('File', textFile.name, textFile.content)
+				text: formatAttachmentText(ATTACHMENT_LABEL_FILE(), textFile.name, textFile.content)
 			});
 		}
 
@@ -725,7 +728,11 @@ export class ChatService {
 		for (const legacyContextFile of legacyContextFiles) {
 			contentParts.push({
 				type: ContentPartType.TEXT,
-				text: formatAttachmentText('File', legacyContextFile.name, legacyContextFile.content)
+				text: formatAttachmentText(
+					ATTACHMENT_LABEL_FILE(),
+					legacyContextFile.name,
+					legacyContextFile.content
+				)
 			});
 		}
 
@@ -760,7 +767,7 @@ export class ChatService {
 			} else {
 				contentParts.push({
 					type: ContentPartType.TEXT,
-					text: formatAttachmentText(ATTACHMENT_LABEL_PDF_FILE, pdfFile.name, pdfFile.content)
+					text: formatAttachmentText(ATTACHMENT_LABEL_PDF_FILE(), pdfFile.name, pdfFile.content)
 				});
 			}
 		}
@@ -774,7 +781,7 @@ export class ChatService {
 			contentParts.push({
 				type: ContentPartType.TEXT,
 				text: formatAttachmentText(
-					ATTACHMENT_LABEL_MCP_PROMPT,
+					ATTACHMENT_LABEL_MCP_PROMPT(),
 					mcpPrompt.name,
 					mcpPrompt.content,
 					mcpPrompt.serverName
@@ -791,7 +798,7 @@ export class ChatService {
 			contentParts.push({
 				type: ContentPartType.TEXT,
 				text: formatAttachmentText(
-					ATTACHMENT_LABEL_MCP_RESOURCE,
+					ATTACHMENT_LABEL_MCP_RESOURCE(),
 					mcpResource.name,
 					mcpResource.content,
 					mcpResource.serverName

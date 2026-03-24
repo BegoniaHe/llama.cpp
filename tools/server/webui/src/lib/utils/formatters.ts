@@ -1,10 +1,16 @@
 import {
+	MEDIUM_DURATION_THRESHOLD,
 	MS_PER_SECOND,
-	SECONDS_PER_MINUTE,
 	SECONDS_PER_HOUR,
-	SHORT_DURATION_THRESHOLD,
-	MEDIUM_DURATION_THRESHOLD
+	SECONDS_PER_MINUTE,
+	SHORT_DURATION_THRESHOLD
 } from '$lib/constants';
+import { getCurrentLocale } from '$lib/i18n/runtime';
+import { m } from '$lib/paraglide/messages';
+
+function getUnknownValue(): string {
+	return m.unknown_value();
+}
 
 /**
  * Formats file size in bytes to human readable format
@@ -14,7 +20,7 @@ import {
  * @returns Formatted file size string
  */
 export function formatFileSize(bytes: number | unknown): string {
-	if (typeof bytes !== 'number') return 'Unknown';
+	if (typeof bytes !== 'number') return getUnknownValue();
 	if (bytes === 0) return '0 Bytes';
 
 	const k = 1024;
@@ -31,7 +37,7 @@ export function formatFileSize(bytes: number | unknown): string {
  * @returns Human-readable parameter count
  */
 export function formatParameters(params: number | unknown): string {
-	if (typeof params !== 'number') return 'Unknown';
+	if (typeof params !== 'number') return getUnknownValue();
 
 	if (params >= 1e9) {
 		return `${(params / 1e9).toFixed(2)}B`;
@@ -55,7 +61,7 @@ export function formatParameters(params: number | unknown): string {
  * @returns Human-readable number
  */
 export function formatNumber(num: number | unknown): string {
-	if (typeof num !== 'number') return 'Unknown';
+	if (typeof num !== 'number') return getUnknownValue();
 
 	return num.toLocaleString();
 }
@@ -83,7 +89,7 @@ export function formatJsonPretty(jsonString: string): string {
  * @returns Formatted time string (HH:MM:SS)
  */
 export function formatTime(date: Date): string {
-	return date.toLocaleTimeString('en-US', {
+	return date.toLocaleTimeString(getCurrentLocale(), {
 		hour12: false,
 		hour: '2-digit',
 		minute: '2-digit',

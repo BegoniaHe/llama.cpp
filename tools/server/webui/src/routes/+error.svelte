@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { ServerErrorSplash } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
 
 	let error = $derived($page.error);
 	let status = $derived($page.status);
@@ -22,12 +23,12 @@
 </script>
 
 <svelte:head>
-	<title>Error {status} - WebUI</title>
+	<title>{m.app_title_error({ status: String(status) })}</title>
 </svelte:head>
 
 {#if isApiKeyError}
 	<ServerErrorSplash
-		error={error?.message || 'Access denied - check server permissions'}
+		error={error?.message || m.error_access_denied()}
 		onRetry={handleRetry}
 		showRetry={false}
 		showTroubleshooting={false}
@@ -54,16 +55,16 @@
 						/>
 					</svg>
 				</div>
-				<h1 class="mb-2 text-2xl font-bold">Error {status}</h1>
+				<h1 class="mb-2 text-2xl font-bold">{m.error_title({ status: String(status) })}</h1>
 				<p class="text-muted-foreground">
-					{error?.message || 'Something went wrong'}
+					{error?.message || m.error_generic_message()}
 				</p>
 			</div>
 			<button
 				onclick={() => goto('#/')}
 				class="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 			>
-				Go Home
+				{m.error_go_home()}
 			</button>
 		</div>
 	</div>

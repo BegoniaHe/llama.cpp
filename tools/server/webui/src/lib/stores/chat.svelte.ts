@@ -11,39 +11,39 @@
  * @see ChatService in services/chat.service.ts for API operations
  */
 
-import { SvelteMap } from 'svelte/reactivity';
-import { DatabaseService, ChatService } from '$lib/services';
-import { conversationsStore } from '$lib/stores/conversations.svelte';
-import { config } from '$lib/stores/settings.svelte';
-import { agenticStore } from '$lib/stores/agentic.svelte';
-import { mcpStore } from '$lib/stores/mcp.svelte';
-import { contextSize, isRouterMode } from '$lib/stores/server.svelte';
 import {
-	selectedModelName,
-	modelsStore,
-	selectedModelContextSize
-} from '$lib/stores/models.svelte';
-import {
-	normalizeModelName,
-	filterByLeafNodeId,
-	findDescendantMessages,
-	findLeafNode,
-	isAbortError
-} from '$lib/utils';
-import {
-	MAX_INACTIVE_CONVERSATION_STATES,
 	INACTIVE_CONVERSATION_STATE_MAX_AGE_MS,
+	MAX_INACTIVE_CONVERSATION_STATES,
 	REASONING_TAGS,
 	SYSTEM_MESSAGE_PLACEHOLDER
 } from '$lib/constants';
+import { ErrorDialogType, MessageRole, MessageType } from '$lib/enums';
+import { ChatService, DatabaseService } from '$lib/services';
+import { agenticStore } from '$lib/stores/agentic.svelte';
+import { conversationsStore } from '$lib/stores/conversations.svelte';
+import { mcpStore } from '$lib/stores/mcp.svelte';
+import {
+	modelsStore,
+	selectedModelContextSize,
+	selectedModelName
+} from '$lib/stores/models.svelte';
+import { contextSize, isRouterMode } from '$lib/stores/server.svelte';
+import { config } from '$lib/stores/settings.svelte';
+import type { ApiProcessingState, DatabaseMessage, DatabaseMessageExtra } from '$lib/types';
 import type {
-	ChatMessageTimings,
 	ChatMessagePromptProgress,
+	ChatMessageTimings,
 	ChatStreamCallbacks,
 	ErrorDialogState
 } from '$lib/types/chat';
-import type { ApiProcessingState, DatabaseMessage, DatabaseMessageExtra } from '$lib/types';
-import { ErrorDialogType, MessageRole, MessageType } from '$lib/enums';
+import {
+	filterByLeafNodeId,
+	findDescendantMessages,
+	findLeafNode,
+	isAbortError,
+	normalizeModelName
+} from '$lib/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 interface ConversationStateEntry {
 	lastAccessed: number;
@@ -382,7 +382,7 @@ class ChatStore {
 			const firstActiveMessage = am.find((m) => m.parent === rootId);
 			const systemMessage = await DatabaseService.createSystemMessage(
 				activeConv.id,
-				SYSTEM_MESSAGE_PLACEHOLDER,
+				SYSTEM_MESSAGE_PLACEHOLDER(),
 				rootId
 			);
 			if (firstActiveMessage) {
