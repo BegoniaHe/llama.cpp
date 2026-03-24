@@ -1,24 +1,25 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { ChevronDown, Loader2, Package } from '@lucide/svelte';
-	import * as Sheet from '$lib/components/ui/sheet';
-	import { cn } from '$lib/components/ui/utils';
-	import {
-		modelsStore,
-		modelOptions,
-		modelsLoading,
-		modelsUpdating,
-		selectedModelId,
-		singleModelName
-	} from '$lib/stores/models.svelte';
-	import { isRouterMode } from '$lib/stores/server.svelte';
 	import {
 		DialogModelInformation,
 		ModelsSelectorList,
 		SearchInput,
 		TruncatedText
 	} from '$lib/components/app';
+	import * as Sheet from '$lib/components/ui/sheet';
+	import { cn } from '$lib/components/ui/utils';
+	import { m } from '$lib/paraglide/messages';
+	import {
+		modelOptions,
+		modelsLoading,
+		modelsStore,
+		modelsUpdating,
+		selectedModelId,
+		singleModelName
+	} from '$lib/stores/models.svelte';
+	import { isRouterMode } from '$lib/stores/server.svelte';
 	import type { ModelOption } from '$lib/types/models';
+	import { ChevronDown, Loader2, Package } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { filterModelOptions, groupModelOptions } from './utils';
 
 	interface Props {
@@ -206,10 +207,10 @@
 	{#if loading && options.length === 0 && isRouter}
 		<div class="flex items-center gap-2 text-xs text-muted-foreground">
 			<Loader2 class="h-3.5 w-3.5 animate-spin" />
-			Loading models…
+			{m.models_loading()}
 		</div>
 	{:else if options.length === 0 && isRouter}
-		<p class="text-xs text-muted-foreground">No models available.</p>
+		<p class="text-xs text-muted-foreground">{m.models_empty()}</p>
 	{:else}
 		{@const selectedOption = getDisplayOption()}
 
@@ -233,7 +234,10 @@
 			>
 				<Package class="h-3.5 w-3.5" />
 
-				<TruncatedText text={selectedOption?.model || 'Select model'} class="min-w-0 font-medium" />
+				<TruncatedText
+					text={selectedOption?.model || m.models_select_button()}
+					class="min-w-0 font-medium"
+				/>
 
 				{#if updating || isLoadingModel}
 					<Loader2 class="h-3 w-3.5 animate-spin" />
@@ -245,16 +249,16 @@
 			<Sheet.Root bind:open={sheetOpen} onOpenChange={handleSheetOpenChange}>
 				<Sheet.Content side="bottom" class="max-h-[85vh] gap-1">
 					<Sheet.Header>
-						<Sheet.Title>Select Model</Sheet.Title>
+						<Sheet.Title>{m.models_sheet_title()}</Sheet.Title>
 
 						<Sheet.Description class="sr-only">
-							Choose a model to use for the conversation
+							{m.models_sheet_description()}
 						</Sheet.Description>
 					</Sheet.Header>
 
 					<div class="flex flex-col gap-1 pb-4">
 						<div class="mb-3 px-4">
-							<SearchInput placeholder="Search models..." bind:value={searchTerm} />
+							<SearchInput placeholder={m.models_search_placeholder()} bind:value={searchTerm} />
 						</div>
 
 						<div class="max-h-[60vh] overflow-y-auto px-2">
@@ -267,13 +271,17 @@
 									<span class="min-w-0 flex-1 truncate">
 										{selectedOption?.name || currentModel}
 									</span>
-									<span class="ml-2 text-xs whitespace-nowrap opacity-70">(not available)</span>
+									<span class="ml-2 text-xs whitespace-nowrap opacity-70">
+										{m.models_not_available()}
+									</span>
 								</button>
 								<div class="my-1 h-px bg-border"></div>
 							{/if}
 
 							{#if filteredOptions.length === 0}
-								<p class="px-3 py-3 text-center text-sm text-muted-foreground">No models found.</p>
+								<p class="px-3 py-3 text-center text-sm text-muted-foreground">
+									{m.models_not_found()}
+								</p>
 							{/if}
 
 							<ModelsSelectorList

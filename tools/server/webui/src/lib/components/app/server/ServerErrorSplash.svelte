@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { AlertTriangle, RefreshCw, Key, CheckCircle, XCircle } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import Label from '$lib/components/ui/label/label.svelte';
-	import { serverStore, serverLoading } from '$lib/stores/server.svelte';
-	import { config, settingsStore } from '$lib/stores/settings.svelte';
-	import { fade, fly, scale } from 'svelte/transition';
 	import { KeyboardKey } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
+	import { serverLoading, serverStore } from '$lib/stores/server.svelte';
+	import { config, settingsStore } from '$lib/stores/settings.svelte';
+	import { AlertTriangle, CheckCircle, Key, RefreshCw, XCircle } from '@lucide/svelte';
+	import { fade, fly, scale } from 'svelte/transition';
 
 	interface Props {
 		class?: string;
@@ -86,9 +87,9 @@
 				apiKeyState = 'error';
 
 				if (response.status === 401 || response.status === 403) {
-					apiKeyError = 'Invalid API key - please check and try again';
+					apiKeyError = m.server_error_invalid_api_key();
 				} else {
-					apiKeyError = `Authentication failed (${response.status})`;
+					apiKeyError = m.server_error_auth_failed({ status: String(response.status) });
 				}
 
 				// Reset to idle state after showing error (don't reload UI)
@@ -102,12 +103,12 @@
 
 			if (error instanceof Error) {
 				if (error.message.includes('fetch')) {
-					apiKeyError = 'Cannot connect to server - check if server is running';
+					apiKeyError = m.server_error_cannot_connect();
 				} else {
 					apiKeyError = error.message;
 				}
 			} else {
-				apiKeyError = 'Connection error - please try again';
+				apiKeyError = m.server_error_connection();
 			}
 
 			// Reset to idle state after showing error (don't reload UI)
@@ -133,7 +134,7 @@
 				<AlertTriangle class="h-8 w-8 text-destructive" />
 			</div>
 
-			<h2 class="mb-2 text-xl font-semibold">Server Connection Error</h2>
+			<h2 class="mb-2 text-xl font-semibold">{m.server_error_title()}</h2>
 
 			<p class="mb-4 text-sm text-muted-foreground">
 				{error}
@@ -144,7 +145,7 @@
 			<div in:fly={{ y: 10, duration: 300, delay: 200 }} class="mb-4">
 				<Button onclick={handleShowApiKeyInput} variant="outline" class="w-full">
 					<Key class="h-4 w-4" />
-					Enter API Key
+					{m.server_error_enter_api_key()}
 				</Button>
 			</div>
 		{/if}
@@ -152,12 +153,14 @@
 		{#if showApiKeyInput}
 			<div in:fly={{ y: 10, duration: 300, delay: 200 }} class="mb-4 space-y-3 text-left">
 				<div class="space-y-2">
-					<Label for="api-key-input" class="text-sm font-medium">API Key</Label>
+					<Label for="api-key-input" class="text-sm font-medium">
+						{m.server_error_label_api_key()}
+					</Label>
 
 					<div class="relative">
 						<Input
 							id="api-key-input"
-							placeholder="Enter your API key..."
+							placeholder={m.server_error_placeholder_api_key()}
 							bind:value={apiKeyInput}
 							onkeydown={handleApiKeyKeydown}
 							class="w-full pr-10 {apiKeyState === 'error'
@@ -194,7 +197,7 @@
 					{/if}
 					{#if apiKeyState === 'success'}
 						<p class="text-sm text-green-600" in:fly={{ y: -10, duration: 200 }}>
-							✓ API key validated successfully! Connecting...
+							{m.server_error_validated()}
 						</p>
 					{/if}
 				</div>
@@ -208,11 +211,11 @@
 					>
 						{#if apiKeyState === 'validating'}
 							<RefreshCw class="h-4 w-4 animate-spin" />
-							Validating...
+							{m.server_error_validating()}
 						{:else if apiKeyState === 'success'}
-							Success!
+							{m.server_error_success()}
 						{:else}
-							Save & Retry
+							{m.server_error_save_retry()}
 						{/if}
 					</Button>
 					<Button
@@ -223,10 +226,8 @@
 						}}
 						variant="outline"
 						class="flex-1"
-						disabled={apiKeyState === 'validating'}
+						disabled={apiKeyState === 'validating'}>{m.chat_sidebar_cancel()}</Button
 					>
-						Cancel
-					</Button>
 				</div>
 			</div>
 		{/if}
@@ -237,11 +238,11 @@
 					{#if isServerLoading}
 						<RefreshCw class="h-4 w-4 animate-spin" />
 
-						Connecting...
+						{m.server_status_connecting()}
 					{:else}
 						<RefreshCw class="h-4 w-4" />
 
-						Retry Connection
+						{m.server_error_retry()}
 					{/if}
 				</Button>
 			</div>
@@ -251,7 +252,7 @@
 			<div class="mt-4 text-left" in:fly={{ y: 10, duration: 300, delay: 400 }}>
 				<details class="text-sm">
 					<summary class="cursor-pointer text-muted-foreground hover:text-foreground">
-						Troubleshooting
+						{m.server_error_troubleshooting()}
 					</summary>
 
 					<div class="mt-2 space-y-3 text-xs text-muted-foreground">

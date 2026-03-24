@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Search, SquarePen, X } from '@lucide/svelte';
 	import { KeyboardShortcutInfo } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { m } from '$lib/paraglide/messages';
+	import { Search, SquarePen, X } from '@lucide/svelte';
 
 	interface Props {
 		handleMobileSidebarItemClick: () => void;
@@ -39,7 +40,7 @@
 				bind:ref={searchInput}
 				bind:value={searchQuery}
 				onkeydown={(e) => e.key === 'Escape' && handleSearchModeDeactivate()}
-				placeholder="Search conversations..."
+				placeholder={m.chat_sidebar_search_input()}
 				class="pl-8"
 			/>
 
@@ -57,7 +58,7 @@
 		>
 			<div class="flex items-center gap-2">
 				<SquarePen class="h-4 w-4" />
-				New chat
+				{m.chat_sidebar_new_chat()}
 			</div>
 
 			<KeyboardShortcutInfo keys={['shift', 'cmd', 'o']} />
@@ -72,7 +73,7 @@
 		>
 			<div class="flex items-center gap-2">
 				<Search class="h-4 w-4" />
-				Search conversations
+				{m.chat_sidebar_search_conversations()}
 			</div>
 
 			<KeyboardShortcutInfo keys={['cmd', 'k']} />

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
+	import { m } from '$lib/paraglide/messages';
 	import { Search, X } from '@lucide/svelte';
 
 	interface Props {
@@ -15,7 +16,7 @@
 
 	let {
 		value = $bindable(''),
-		placeholder = 'Search...',
+		placeholder = m.chat_sidebar_search_input(),
 		onInput,
 		onClose,
 		onKeyDown,
@@ -65,7 +66,7 @@
 			type="button"
 			class="absolute top-1/2 right-3 -translate-y-1/2 transform text-muted-foreground transition-colors hover:text-foreground"
 			onclick={handleClear}
-			aria-label={value ? 'Clear search' : 'Close'}
+			aria-label={value ? m.search_input_clear() : m.search_input_close()}
 		>
 			<X class="h-4 w-4" />
 		</button>

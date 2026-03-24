@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Server } from '@lucide/svelte';
 	import { ServerStatus } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
+	import { Server } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 
 	interface Props {
@@ -8,8 +9,7 @@
 		message?: string;
 	}
 
-	let { class: className = '', message = 'Initializing connection to llama.cpp server...' }: Props =
-		$props();
+	let { class: className = '', message = m.server_loading_message() }: Props = $props();
 </script>
 
 <div class="flex h-full items-center justify-center {className}">
@@ -19,7 +19,7 @@
 				<Server class="h-8 w-8 animate-pulse text-muted-foreground" />
 			</div>
 
-			<h2 class="mb-2 text-xl font-semibold">Connecting to Server</h2>
+			<h2 class="mb-2 text-xl font-semibold">{m.server_loading_title()}</h2>
 
 			<p class="text-sm text-muted-foreground">
 				{message}

@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Trash2, Pencil, MoreHorizontal, Download, Loader2, Square } from '@lucide/svelte';
 	import { DropdownMenuActions } from '$lib/components/app';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { m } from '$lib/paraglide/messages';
 	import { getAllLoadingChats } from '$lib/stores/chat.svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { Download, Loader2, MoreHorizontal, Pencil, Square, Trash2 } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -105,7 +106,7 @@
 						onkeydown={(e) => e.key === 'Enter' && handleStop(e)}
 						role="button"
 						tabindex="0"
-						aria-label="Stop generation"
+						aria-label={m.chat_sidebar_stop_generation()}
 					>
 						<Loader2 class="loading-icon h-3.5 w-3.5 animate-spin" />
 
@@ -114,7 +115,7 @@
 				</Tooltip.Trigger>
 
 				<Tooltip.Content>
-					<p>Stop generation</p>
+					<p>{m.chat_sidebar_stop_generation()}</p>
 				</Tooltip.Content>
 			</Tooltip.Root>
 		{/if}
@@ -130,18 +131,18 @@
 		<div class="actions flex items-center">
 			<DropdownMenuActions
 				triggerIcon={MoreHorizontal}
-				triggerTooltip="More actions"
+				triggerTooltip={m.chat_sidebar_more_actions()}
 				bind:open={dropdownOpen}
 				actions={[
 					{
 						icon: Pencil,
-						label: 'Edit',
+						label: m.chat_sidebar_edit_action(),
 						onclick: handleEdit,
 						shortcut: ['shift', 'cmd', 'e']
 					},
 					{
 						icon: Download,
-						label: 'Export',
+						label: m.chat_sidebar_export_action(),
 						onclick: (e: Event) => {
 							e.stopPropagation();
 							conversationsStore.downloadConversation(conversation.id);
@@ -150,7 +151,7 @@
 					},
 					{
 						icon: Trash2,
-						label: 'Delete',
+						label: m.chat_sidebar_delete(),
 						onclick: handleDelete,
 						variant: 'destructive',
 						shortcut: ['shift', 'cmd', 'd'],

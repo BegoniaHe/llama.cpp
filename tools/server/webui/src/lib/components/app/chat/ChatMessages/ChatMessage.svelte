@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getChatActionsContext, setMessageEditContext } from '$lib/contexts';
-	import { chatStore, pendingEditMessageId } from '$lib/stores/chat.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { DatabaseService } from '$lib/services';
-	import { SYSTEM_MESSAGE_PLACEHOLDER } from '$lib/constants';
-	import { MessageRole, AttachmentType } from '$lib/enums';
 	import {
 		ChatMessageAssistant,
-		ChatMessageUser,
+		ChatMessageMcpPrompt,
 		ChatMessageSystem,
-		ChatMessageMcpPrompt
+		ChatMessageUser
 	} from '$lib/components/app/chat';
-	import { parseFilesToMessageExtras } from '$lib/utils/browser-only';
+	import { SYSTEM_MESSAGE_PLACEHOLDER } from '$lib/constants';
+	import { getChatActionsContext, setMessageEditContext } from '$lib/contexts';
+	import { AttachmentType, MessageRole } from '$lib/enums';
+	import { DatabaseService } from '$lib/services';
+	import { chatStore, pendingEditMessageId } from '$lib/stores/chat.svelte';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import type { DatabaseMessageExtraMcpPrompt } from '$lib/types';
+	import { parseFilesToMessageExtras } from '$lib/utils/browser-only';
 
 	interface Props {
 		class?: string;
@@ -154,7 +154,7 @@
 		isEditing = true;
 		// Clear temporary placeholder content for system messages
 		editedContent =
-			message.role === MessageRole.SYSTEM && message.content === SYSTEM_MESSAGE_PLACEHOLDER
+			message.role === MessageRole.SYSTEM && message.content === SYSTEM_MESSAGE_PLACEHOLDER()
 				? ''
 				: message.content;
 		textareaElement?.focus();

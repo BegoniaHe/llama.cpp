@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Check, X } from '@lucide/svelte';
-	import { Card } from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
 	import { MarkdownContent } from '$lib/components/app';
-	import { getMessageEditContext } from '$lib/contexts';
+	import { Button } from '$lib/components/ui/button';
+	import { Card } from '$lib/components/ui/card';
 	import { INPUT_CLASSES } from '$lib/constants';
+	import { getMessageEditContext } from '$lib/contexts';
+	import { KeyboardKey, MessageRole } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { config } from '$lib/stores/settings.svelte';
 	import { isIMEComposing } from '$lib/utils';
+	import { Check, X } from '@lucide/svelte';
 	import ChatMessageActions from './ChatMessageActions.svelte';
-	import { KeyboardKey, MessageRole } from '$lib/enums';
 
 	interface Props {
 		class?: string;
@@ -99,7 +100,7 @@
 </script>
 
 <div
-	aria-label="System message with actions"
+	aria-label={m.chat_message_system_aria()}
 	class="group flex flex-col items-end gap-3 md:gap-2 {className}"
 	role="group"
 >
@@ -111,14 +112,14 @@
 				class="min-h-[60px] w-full resize-none rounded-2xl px-3 py-2 text-sm {INPUT_CLASSES}"
 				onkeydown={handleEditKeydown}
 				oninput={(e) => editCtx.setContent(e.currentTarget.value)}
-				placeholder="Edit system message..."
+				placeholder={m.chat_message_system_edit_placeholder()}
 			></textarea>
 
 			<div class="mt-2 flex justify-end gap-2">
 				<Button class="h-8 px-3" onclick={editCtx.cancel} size="sm" variant="outline">
 					<X class="mr-1 h-3 w-3" />
 
-					Cancel
+					{m.chat_sidebar_cancel()}
 				</Button>
 
 				<Button
@@ -129,7 +130,7 @@
 				>
 					<Check class="mr-1 h-3 w-3" />
 
-					Save
+					{m.chat_sidebar_save()}
 				</Button>
 			</div>
 		</div>
@@ -185,7 +186,7 @@
 										size="sm"
 										variant="outline"
 									>
-										Show full system message
+										{m.chat_message_system_show_full()}
 									</Button>
 								</div>
 							{/if}
@@ -202,7 +203,7 @@
 									size="sm"
 									variant="outline"
 								>
-									Collapse System Message
+									{m.chat_message_system_collapse()}
 								</Button>
 							</div>
 						{/if}

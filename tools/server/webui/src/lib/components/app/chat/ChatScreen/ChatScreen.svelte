@@ -1,42 +1,42 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import {
+		ChatMessages,
 		ChatScreenForm,
 		ChatScreenHeader,
-		ChatMessages,
 		ChatScreenProcessingInfo,
-		DialogEmptyFileAlert,
 		DialogChatError,
-		ServerLoadingSplash,
-		DialogConfirmation
+		DialogConfirmation,
+		DialogEmptyFileAlert,
+		ServerLoadingSplash
 	} from '$lib/components/app';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { INITIAL_SCROLL_DELAY } from '$lib/constants';
-	import { KeyboardKey } from '$lib/enums';
+	import { ErrorDialogType, KeyboardKey } from '$lib/enums';
 	import { createAutoScrollController } from '$lib/hooks/use-auto-scroll.svelte';
+	import { m } from '$lib/paraglide/messages';
 	import {
 		chatStore,
 		errorDialog,
-		isLoading,
+		getAddFilesHandler,
 		isChatStreaming,
 		isEditing,
-		getAddFilesHandler
+		isLoading
 	} from '$lib/stores/chat.svelte';
 	import {
-		conversationsStore,
+		activeConversation,
 		activeMessages,
-		activeConversation
+		conversationsStore
 	} from '$lib/stores/conversations.svelte';
+	import { modelOptions, modelsStore, selectedModelId } from '$lib/stores/models.svelte';
+	import { isRouterMode, serverError, serverLoading, serverStore } from '$lib/stores/server.svelte';
 	import { config } from '$lib/stores/settings.svelte';
-	import { serverLoading, serverError, serverStore, isRouterMode } from '$lib/stores/server.svelte';
-	import { modelsStore, modelOptions, selectedModelId } from '$lib/stores/models.svelte';
-	import { isFileTypeSupported, filterFilesByModalities } from '$lib/utils';
+	import { filterFilesByModalities, isFileTypeSupported } from '$lib/utils';
 	import { parseFilesToMessageExtras, processFilesToChatUploaded } from '$lib/utils/browser-only';
-	import { ErrorDialogType } from '$lib/enums';
+	import { AlertTriangle, RefreshCw, Trash2 } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-	import { Trash2, AlertTriangle, RefreshCw } from '@lucide/svelte';
 	import ChatScreenDragOverlay from './ChatScreenDragOverlay.svelte';
 
 	let { showCenteredEmpty = false } = $props();
@@ -350,7 +350,7 @@
 {#if !isEmpty}
 	<div
 		bind:this={chatScrollContainer}
-		aria-label="Chat interface with file drop zone"
+		aria-label={m.chat_aria_interface()}
 		class="flex h-full flex-col overflow-y-auto px-4 md:px-6"
 		ondragenter={handleDragEnter}
 		ondragleave={handleDragLeave}
@@ -382,14 +382,14 @@
 					<Alert.Root variant="destructive">
 						<AlertTriangle class="h-4 w-4" />
 						<Alert.Title class="flex items-center justify-between">
-							<span>Server unavailable</span>
+							<span>{m.chat_file_upload_server_unavailable()}</span>
 							<button
 								onclick={() => serverStore.fetch()}
 								disabled={isServerLoading}
 								class="flex items-center gap-1.5 rounded-lg bg-destructive/20 px-2 py-1 text-xs font-medium hover:bg-destructive/30 disabled:opacity-50"
 							>
 								<RefreshCw class="h-3 w-3 {isServerLoading ? 'animate-spin' : ''}" />
-								{isServerLoading ? 'Retrying...' : 'Retry'}
+								{isServerLoading ? m.chat_file_upload_retrying() : m.chat_file_upload_retry()}
 							</button>
 						</Alert.Title>
 						<Alert.Description>{serverError()}</Alert.Description>
@@ -418,7 +418,7 @@
 	<ServerLoadingSplash />
 {:else}
 	<div
-		aria-label="Welcome screen with file drop zone"
+		aria-label={m.chat_aria_welcome()}
 		class="flex h-full items-center justify-center"
 		ondragenter={handleDragEnter}
 		ondragleave={handleDragLeave}
@@ -432,8 +432,8 @@
 
 				<p class="text-muted-foreground md:text-lg">
 					{serverStore.props?.modalities?.audio
-						? 'Record audio, type a message '
-						: 'Type a message'} or upload files to get started
+						? m.chat_file_upload_welcome_with_audio()
+						: m.chat_file_upload_welcome_without_audio()}
 				</p>
 			</div>
 
@@ -443,7 +443,7 @@
 						<AlertTriangle class="h-4 w-4" />
 
 						<Alert.Title class="flex items-center justify-between">
-							<span>Server unavailable</span>
+							<span>{m.chat_file_upload_server_unavailable()}</span>
 
 							<button
 								onclick={() => serverStore.fetch()}
@@ -451,7 +451,7 @@
 								class="flex items-center gap-1.5 rounded-lg bg-destructive/20 px-2 py-1 text-xs font-medium hover:bg-destructive/30 disabled:opacity-50"
 							>
 								<RefreshCw class="h-3 w-3 {isServerLoading ? 'animate-spin' : ''}" />
-								{isServerLoading ? 'Retrying...' : 'Retry'}
+								{isServerLoading ? m.chat_file_upload_retrying() : m.chat_file_upload_retry()}
 							</button>
 						</Alert.Title>
 
@@ -485,17 +485,19 @@
 
 		<AlertDialog.Content class="flex max-w-md flex-col">
 			<AlertDialog.Header>
-				<AlertDialog.Title>File Upload Error</AlertDialog.Title>
+				<AlertDialog.Title>{m.chat_file_upload_error_title()}</AlertDialog.Title>
 
 				<AlertDialog.Description class="text-sm text-muted-foreground">
-					Some files cannot be uploaded with the current model.
+					{m.chat_file_upload_error_description()}
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 
 			<div class="!max-h-[50vh] min-h-0 flex-1 space-y-4 overflow-y-auto">
 				{#if fileErrorData.generallyUnsupported.length > 0}
 					<div class="space-y-2">
-						<h4 class="text-sm font-medium text-destructive">Unsupported File Types</h4>
+						<h4 class="text-sm font-medium text-destructive">
+							{m.chat_file_upload_unsupported_types()}
+						</h4>
 
 						<div class="space-y-1">
 							{#each fileErrorData.generallyUnsupported as file (file.name)}
@@ -504,7 +506,9 @@
 										{file.name}
 									</p>
 
-									<p class="mt-1 text-xs text-muted-foreground">File type not supported</p>
+									<p class="mt-1 text-xs text-muted-foreground">
+										{m.chat_file_upload_not_supported()}
+									</p>
 								</div>
 							{/each}
 						</div>
@@ -521,7 +525,7 @@
 									</p>
 
 									<p class="mt-1 text-xs text-muted-foreground">
-										{fileErrorData.modalityReasons[file.name] || 'Not supported by current model'}
+										{fileErrorData.modalityReasons[file.name] || m.chat_model_not_supported()}
 									</p>
 								</div>
 							{/each}
@@ -531,7 +535,7 @@
 			</div>
 
 			<div class="rounded-md bg-muted/50 p-3">
-				<h4 class="mb-2 text-sm font-medium">This model supports:</h4>
+				<h4 class="mb-2 text-sm font-medium">{m.chat_file_upload_model_supports()}</h4>
 
 				<p class="text-sm text-muted-foreground">
 					{fileErrorData.supportedTypes.join(', ')}
@@ -540,7 +544,7 @@
 
 			<AlertDialog.Footer>
 				<AlertDialog.Action onclick={() => (showFileErrorDialog = false)}>
-					Got it
+					{m.chat_file_upload_got_it()}
 				</AlertDialog.Action>
 			</AlertDialog.Footer>
 		</AlertDialog.Content>
@@ -549,10 +553,10 @@
 
 <DialogConfirmation
 	bind:open={showDeleteDialog}
-	title="Delete Conversation"
-	description="Are you sure you want to delete this conversation? This action cannot be undone and will permanently remove all messages in this conversation."
-	confirmText="Delete"
-	cancelText="Cancel"
+	title={m.chat_sidebar_delete_title()}
+	description={m.chat_delete_description()}
+	confirmText={m.chat_sidebar_delete()}
+	cancelText={m.chat_sidebar_cancel()}
 	variant="destructive"
 	icon={Trash2}
 	onConfirm={handleDeleteConfirm}

@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { Trash2 } from '@lucide/svelte';
 	import { ChatSidebarConversationItem, DialogConfirmation } from '$lib/components/app';
-	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import Input from '$lib/components/ui/input/input.svelte';
-	import { conversationsStore, conversations } from '$lib/stores/conversations.svelte';
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { m } from '$lib/paraglide/messages';
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { conversations, conversationsStore } from '$lib/stores/conversations.svelte';
 	import { getPreviewText } from '$lib/utils';
+	import { Trash2 } from '@lucide/svelte';
 	import ChatSidebarActions from './ChatSidebarActions.svelte';
 
 	const sidebar = Sidebar.useSidebar();
@@ -121,7 +122,7 @@
 	<Sidebar.Group class="mt-4 space-y-2 p-0 px-4">
 		{#if (filteredConversations.length > 0 && isSearchModeActive) || !isSearchModeActive}
 			<Sidebar.GroupLabel>
-				{isSearchModeActive ? 'Search results' : 'Conversations'}
+				{isSearchModeActive ? m.chat_sidebar_search_results() : m.chat_sidebar_title()}
 			</Sidebar.GroupLabel>
 		{/if}
 
@@ -150,10 +151,10 @@
 					<div class="px-2 py-4 text-center">
 						<p class="mb-4 p-4 text-sm text-muted-foreground">
 							{searchQuery.length > 0
-								? 'No results found'
+								? m.chat_sidebar_no_results()
 								: isSearchModeActive
-									? 'Start typing to see results'
-									: 'No conversations yet'}
+									? m.chat_sidebar_start_typing()
+									: m.chat_sidebar_empty()}
 						</p>
 					</div>
 				{/if}
@@ -164,12 +165,12 @@
 
 <DialogConfirmation
 	bind:open={showDeleteDialog}
-	title="Delete Conversation"
+	title={m.chat_sidebar_delete_title()}
 	description={selectedConversation
-		? `Are you sure you want to delete "${selectedConversationNamePreview}"? This action cannot be undone and will permanently remove all messages in this conversation.`
+		? m.chat_sidebar_delete_confirm({ title: selectedConversationNamePreview })
 		: ''}
-	confirmText="Delete"
-	cancelText="Cancel"
+	confirmText={m.chat_sidebar_delete()}
+	cancelText={m.chat_sidebar_cancel()}
 	variant="destructive"
 	icon={Trash2}
 	onConfirm={handleConfirmDelete}
@@ -182,7 +183,7 @@
 <AlertDialog.Root bind:open={showEditDialog}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Edit Conversation Name</AlertDialog.Title>
+			<AlertDialog.Title>{m.chat_sidebar_edit_title()}</AlertDialog.Title>
 			<AlertDialog.Description>
 				<Input
 					class="mt-4 text-foreground"
@@ -192,7 +193,7 @@
 							handleConfirmEdit();
 						}
 					}}
-					placeholder="Enter a new name"
+					placeholder={m.chat_sidebar_edit_placeholder()}
 					type="text"
 					bind:value={editedName}
 				/>
@@ -203,9 +204,9 @@
 				onclick={() => {
 					showEditDialog = false;
 					selectedConversation = null;
-				}}>Cancel</AlertDialog.Cancel
+				}}>{m.chat_sidebar_cancel()}</AlertDialog.Cancel
 			>
-			<AlertDialog.Action onclick={handleConfirmEdit}>Save</AlertDialog.Action>
+			<AlertDialog.Action onclick={handleConfirmEdit}>{m.chat_sidebar_save()}</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

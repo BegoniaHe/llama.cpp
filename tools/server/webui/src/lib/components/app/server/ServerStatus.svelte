@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { AlertTriangle, Server } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import { serverProps, serverLoading, serverError } from '$lib/stores/server.svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { singleModelName } from '$lib/stores/models.svelte';
+	import { serverError, serverLoading, serverProps } from '$lib/stores/server.svelte';
+	import { AlertTriangle, Server } from '@lucide/svelte';
 
 	interface Props {
 		class?: string;
@@ -26,11 +27,11 @@
 	}
 
 	function getStatusText() {
-		if (loading) return 'Connecting...';
-		if (error) return 'Connection Error';
-		if (serverData) return 'Connected';
+		if (loading) return m.server_status_connecting();
+		if (error) return m.server_status_error();
+		if (serverData) return m.server_status_connected();
 
-		return 'Unknown';
+		return m.server_status_unknown();
 	}
 </script>
 
@@ -45,7 +46,7 @@
 		<Badge variant="outline" class="text-xs">
 			<Server class="mr-1 h-3 w-3" />
 
-			{model || 'Unknown Model'}
+			{model || m.server_status_unknown_model()}
 		</Badge>
 
 		{#if serverData?.default_generation_settings?.n_ctx}
