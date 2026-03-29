@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
 	import { McpServerForm } from '$lib/components/app/mcp';
+	import { Button } from '$lib/components/ui/button';
+	import * as m from '$lib/paraglide/messages';
 
 	interface Props {
 		serverId: string;
@@ -17,12 +18,12 @@
 	let editUseProxy = $derived(serverUseProxy);
 
 	let urlError = $derived.by(() => {
-		if (!editUrl.trim()) return 'URL is required';
+		if (!editUrl.trim()) return m.mcp_server_form_url_required();
 		try {
 			new URL(editUrl);
 			return null;
 		} catch {
-			return 'Invalid URL format';
+			return m.mcp_server_form_url_invalid();
 		}
 	});
 
@@ -41,7 +42,7 @@
 </script>
 
 <div class="space-y-4">
-	<p class="font-medium">Configure Server</p>
+	<p class="font-medium">{m.mcp_server_edit_configure_title()}</p>
 
 	<McpServerForm
 		url={editUrl}
@@ -55,10 +56,10 @@
 	/>
 
 	<div class="flex items-center justify-end gap-2">
-		<Button variant="secondary" size="sm" onclick={onCancel}>Cancel</Button>
+		<Button variant="secondary" size="sm" onclick={onCancel}>{m.chat_sidebar_cancel()}</Button>
 
 		<Button size="sm" onclick={handleSave} disabled={!canSave}>
-			{serverUrl.trim() ? 'Update' : 'Add'}
+			{serverUrl.trim() ? m.mcp_server_edit_update() : m.mcp_servers_add_button()}
 		</Button>
 	</div>
 </div>

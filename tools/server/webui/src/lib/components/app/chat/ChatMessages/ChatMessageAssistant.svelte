@@ -1,27 +1,27 @@
 <script lang="ts">
 	import {
-		ChatMessageAgenticContent,
 		ChatMessageActions,
+		ChatMessageAgenticContent,
 		ChatMessageStatistics,
 		ModelBadge,
 		ModelsSelector
 	} from '$lib/components/app';
-	import { getMessageEditContext } from '$lib/contexts';
-	import { useProcessingState } from '$lib/hooks/use-processing-state.svelte';
-	import { isLoading, isChatStreaming } from '$lib/stores/chat.svelte';
-	import { autoResizeTextarea, copyToClipboard, isIMEComposing } from '$lib/utils';
-	import { tick } from 'svelte';
-	import { fade } from 'svelte/transition';
-	import { Check, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { AGENTIC_TAGS, INPUT_CLASSES, REASONING_TAGS } from '$lib/constants';
-	import { MessageRole, KeyboardKey, ChatMessageStatsView } from '$lib/enums';
 	import Label from '$lib/components/ui/label/label.svelte';
-	import { config } from '$lib/stores/settings.svelte';
-	import { isRouterMode } from '$lib/stores/server.svelte';
+	import { AGENTIC_TAGS, INPUT_CLASSES, REASONING_TAGS } from '$lib/constants';
+	import { getMessageEditContext } from '$lib/contexts';
+	import { ChatMessageStatsView, KeyboardKey, MessageRole, ServerModelStatus } from '$lib/enums';
+	import { useProcessingState } from '$lib/hooks/use-processing-state.svelte';
+	import { m } from '$lib/paraglide/messages';
+	import { isChatStreaming, isLoading } from '$lib/stores/chat.svelte';
 	import { modelsStore } from '$lib/stores/models.svelte';
-	import { ServerModelStatus } from '$lib/enums';
+	import { isRouterMode } from '$lib/stores/server.svelte';
+	import { config } from '$lib/stores/settings.svelte';
+	import { autoResizeTextarea, copyToClipboard, isIMEComposing } from '$lib/utils';
+	import { Check, X } from '@lucide/svelte';
+	import { tick } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	interface Props {
 		class?: string;
@@ -190,7 +190,7 @@
 <div
 	class="text-md group w-full leading-7.5 {className}"
 	role="group"
-	aria-label="Assistant message with actions"
+	aria-label={m.chat_message_assistant_aria()}
 >
 	{#if showProcessingInfoTop}
 		<div class="mt-6 w-full max-w-[48rem]" in:fade>
@@ -198,7 +198,7 @@
 				<span class="processing-text">
 					{processingState.getPromptProgressText() ??
 						processingState.getProcessingMessage() ??
-						'Processing...'}
+						m.chat_message_assistant_processing()}
 				</span>
 			</div>
 		</div>
@@ -215,7 +215,7 @@
 					autoResizeTextarea(e.currentTarget);
 					editCtx.setContent(e.currentTarget.value);
 				}}
-				placeholder="Edit assistant message..."
+				placeholder={m.chat_message_assistant_edit_placeholder()}
 			></textarea>
 
 			<div class="mt-2 flex items-center justify-between">
@@ -226,13 +226,13 @@
 						onCheckedChange={(checked) => (shouldBranchAfterEdit = checked === true)}
 					/>
 					<Label for="branch-after-edit" class="cursor-pointer text-sm text-muted-foreground">
-						Branch conversation after edit
+						{m.chat_message_assistant_branch_after_edit()}
 					</Label>
 				</div>
 				<div class="flex gap-2">
 					<Button class="h-8 px-3" onclick={editCtx.cancel} size="sm" variant="outline">
 						<X class="mr-1 h-3 w-3" />
-						Cancel
+						{m.chat_sidebar_cancel()}
 					</Button>
 
 					<Button
@@ -242,7 +242,7 @@
 						size="sm"
 					>
 						<Check class="mr-1 h-3 w-3" />
-						Save
+						{m.chat_sidebar_save()}
 					</Button>
 				</div>
 			</div>
@@ -270,7 +270,7 @@
 				<span class="processing-text">
 					{processingState.getPromptProgressText() ??
 						processingState.getProcessingMessage() ??
-						'Processing...'}
+						m.chat_message_assistant_processing()}
 				</span>
 			</div>
 		</div>

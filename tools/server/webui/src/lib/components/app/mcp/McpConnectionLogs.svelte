@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { ChevronDown, ChevronRight } from '@lucide/svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { cn } from '$lib/components/ui/utils';
+	import { m } from '$lib/paraglide/messages';
 	import type { MCPConnectionLog } from '$lib/types';
-	import { formatTime, getMcpLogLevelIcon, getMcpLogLevelClass } from '$lib/utils';
+	import { formatTime, getMcpLogLevelClass, getMcpLogLevelIcon } from '$lib/utils';
+	import { ChevronDown, ChevronRight } from '@lucide/svelte';
 
 	interface Props {
 		logs: MCPConnectionLog[];
@@ -29,10 +30,10 @@
 					<ChevronRight class="h-3.5 w-3.5" />
 				{/if}
 
-				<span>Connection Log ({logs.length})</span>
+				<span>{m.mcp_connection_log_title({ count: String(logs.length) })}</span>
 
 				{#if connectionTimeMs !== undefined}
-					<span class="ml-1">· Connected in {connectionTimeMs}ms</span>
+					<span class="ml-1">· {m.mcp_connection_log_connected_in({ ms: String(connectionTimeMs) })}</span>
 				{/if}
 			</Collapsible.Trigger>
 		</div>

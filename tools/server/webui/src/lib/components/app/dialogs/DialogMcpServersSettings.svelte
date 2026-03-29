@@ -1,6 +1,7 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { McpLogo, McpServersSettings } from '$lib/components/app';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { m } from '$lib/paraglide/messages';
 
 	interface Props {
 		onOpenChange?: (open: boolean) => void;
@@ -24,11 +25,11 @@
 			<Dialog.Title class="inline-flex items-center text-lg font-semibold">
 				<McpLogo class="mr-2 inline h-4 w-4" />
 
-				MCP Servers
+				{m.chat_sidebar_mcp_servers()}
 			</Dialog.Title>
 
 			<Dialog.Description class="text-sm text-muted-foreground">
-				Add and configure MCP servers to enable agentic tool execution capabilities.
+				{m.mcp_dialog_servers_description()}
 			</Dialog.Description>
 		</div>
 

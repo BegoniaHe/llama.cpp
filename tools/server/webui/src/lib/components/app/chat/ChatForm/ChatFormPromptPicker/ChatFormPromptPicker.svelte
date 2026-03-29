@@ -1,19 +1,20 @@
 <script lang="ts">
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { debounce, uuid } from '$lib/utils';
-	import { KeyboardKey } from '$lib/enums';
-	import type { MCPPromptInfo, GetPromptResult, MCPServerSettingsEntry } from '$lib/types';
-	import { SvelteMap } from 'svelte/reactivity';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import {
-		ChatFormPickerPopover,
+		ChatFormPickerItemHeader,
 		ChatFormPickerList,
 		ChatFormPickerListItem,
-		ChatFormPickerItemHeader,
 		ChatFormPickerListItemSkeleton,
+		ChatFormPickerPopover,
 		ChatFormPromptPickerArgumentForm
 	} from '$lib/components/app/chat';
+	import Badge from '$lib/components/ui/badge/badge.svelte';
+	import { KeyboardKey } from '$lib/enums';
+	import * as m from '$lib/paraglide/messages';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import type { GetPromptResult, MCPPromptInfo, MCPServerSettingsEntry } from '$lib/types';
+	import { debounce, uuid } from '$lib/utils';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	interface Props {
 		class?: string;
@@ -348,7 +349,7 @@
 <ChatFormPickerPopover
 	bind:isOpen
 	class={className}
-	srLabel="Open prompt picker"
+	srLabel={m.mcp_prompt_picker_open()}
 	{onClose}
 	onKeydown={handleKeydown}
 >
@@ -367,7 +368,7 @@
 				{#snippet titleExtra()}
 					{#if prompt.arguments?.length}
 						<Badge variant="secondary">
-							{prompt.arguments.length} arg{prompt.arguments.length > 1 ? 's' : ''}
+							{m.mcp_prompt_picker_argument_count({ count: prompt.arguments.length })}
 						</Badge>
 					{/if}
 				{/snippet}
@@ -397,8 +398,8 @@
 			{selectedIndex}
 			bind:searchQuery={internalSearchQuery}
 			{showSearchInput}
-			searchPlaceholder="Search prompts..."
-			emptyMessage="No MCP prompts available"
+			searchPlaceholder={m.mcp_prompt_picker_search_placeholder()}
+			emptyMessage={m.mcp_prompt_picker_empty()}
 			itemKey={(prompt) => prompt.serverName + ':' + prompt.name}
 		>
 			{#snippet item(prompt, index, isSelected)}
@@ -419,7 +420,7 @@
 						{#snippet titleExtra()}
 							{#if prompt.arguments?.length}
 								<Badge variant="secondary">
-									{prompt.arguments.length} arg{prompt.arguments.length > 1 ? 's' : ''}
+									{m.mcp_prompt_picker_argument_count({ count: prompt.arguments.length })}
 								</Badge>
 							{/if}
 						{/snippet}

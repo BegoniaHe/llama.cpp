@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { FileText, Loader2, AlertCircle, Download } from '@lucide/svelte';
+	import { ActionIconCopyToClipboard } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/components/ui/utils';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import {
-		isImageMimeType,
-		createBase64DataUrl,
-		getResourceTextContent,
-		getResourceBlobContent,
-		downloadResourceContent
-	} from '$lib/utils';
 	import { MimeTypeApplication, MimeTypeText } from '$lib/enums';
-	import { ActionIconCopyToClipboard } from '$lib/components/app';
-	import type { MCPResourceInfo, MCPResourceContent } from '$lib/types';
+	import { m } from '$lib/paraglide/messages';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import type { MCPResourceContent, MCPResourceInfo } from '$lib/types';
+	import {
+		createBase64DataUrl,
+		downloadResourceContent,
+		getResourceBlobContent,
+		getResourceTextContent,
+		isImageMimeType
+	} from '$lib/utils';
+	import { AlertCircle, Download, FileText, Loader2 } from '@lucide/svelte';
 
 	interface Props {
 		resource: MCPResourceInfo | null;
@@ -51,10 +52,10 @@
 			if (result) {
 				content = result;
 			} else {
-				error = 'Failed to load resource content';
+				error = m.mcp_resource_error_failed_to_load_content();
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Unknown error';
+			error = e instanceof Error ? e.message : m.mcp_resource_error_unknown();
 		} finally {
 			isLoading = false;
 		}
@@ -66,7 +67,7 @@
 		downloadResourceContent(
 			text,
 			resource.mimeType || MimeTypeText.PLAIN,
-			resource.name || 'resource.txt'
+			resource.name || m.mcp_resource_default_filename()
 		);
 	}
 </script>
@@ -76,7 +77,7 @@
 		<div class="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
 			<FileText class="h-8 w-8 opacity-50" />
 
-			<span class="text-sm">Select a resource to preview</span>
+			<span class="text-sm">{m.mcp_resource_select_to_preview()}</span>
 		</div>
 	{:else}
 		<div class="flex items-start justify-between gap-2">
@@ -94,7 +95,7 @@
 				<ActionIconCopyToClipboard
 					text={getResourceTextContent(content)}
 					canCopy={!isLoading && !!getResourceTextContent(content)}
-					ariaLabel="Copy content"
+					ariaLabel={m.mcp_action_copy_content()}
 				/>
 
 				<Button
@@ -103,7 +104,7 @@
 					class="h-7 w-7 p-0"
 					onclick={handleDownload}
 					disabled={isLoading || !getResourceTextContent(content)}
-					title="Download content"
+					title={m.mcp_action_download_content()}
 				>
 					<Download class="h-3.5 w-3.5" />
 				</Button>
@@ -136,20 +137,20 @@
 								blob.mimeType ?? MimeTypeApplication.OCTET_STREAM,
 								blob.blob
 							)}
-							alt="Resource content"
+							alt={m.mcp_resource_content_alt()}
 							class="max-w-full rounded"
 						/>
 					{:else}
 						<div class="flex items-center gap-2 rounded bg-muted p-2 text-sm text-muted-foreground">
 							<FileText class="h-4 w-4" />
 
-							<span>Binary content ({blob.mimeType || 'unknown type'})</span>
+							<span>{m.mcp_resource_binary_content({ type: blob.mimeType || m.unknown_value() })}</span>
 						</div>
 					{/if}
 				{/each}
 
 				{#if !textContent && blobContent.length === 0}
-					<div class="py-4 text-center text-sm text-muted-foreground">No content available</div>
+						<div class="py-4 text-center text-sm text-muted-foreground">{m.mcp_resource_no_content_available()}</div>
 				{/if}
 			{/if}
 		</div>
@@ -162,12 +163,12 @@
 
 				{#if resource.annotations?.priority !== undefined}
 					<span class="rounded bg-muted px-1.5 py-0.5">
-						Priority: {resource.annotations.priority}
+						{m.mcp_resource_priority({ value: String(resource.annotations.priority) })}
 					</span>
 				{/if}
 
 				<span class="rounded bg-muted px-1.5 py-0.5">
-					Server: {resource.serverName}
+					{m.mcp_resource_server({ name: resource.serverName })}
 				</span>
 			</div>
 		{/if}

@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { Settings } from '@lucide/svelte';
+	import { DropdownMenuSearchable, McpActiveServersAvatars } from '$lib/components/app';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Switch } from '$lib/components/ui/switch';
-	import { DropdownMenuSearchable, McpActiveServersAvatars } from '$lib/components/app';
+	import { HealthCheckStatus } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { HealthCheckStatus } from '$lib/enums';
 	import type { MCPServerSettingsEntry } from '$lib/types';
+	import { Settings } from '@lucide/svelte';
 
 	interface Props {
 		class?: string;
@@ -86,7 +87,7 @@
 				type="button"
 				class="inline-flex cursor-pointer items-center rounded-sm py-1 disabled:cursor-not-allowed disabled:opacity-60"
 				{disabled}
-				aria-label="MCP Servers"
+				aria-label={m.chat_sidebar_mcp_servers()}
 			>
 				<McpActiveServersAvatars class={className} />
 			</button>
@@ -95,8 +96,8 @@
 		<DropdownMenu.Content align="start" class="w-72 pt-0">
 			<DropdownMenuSearchable
 				bind:searchValue={searchQuery}
-				placeholder="Search servers..."
-				emptyMessage="No servers found"
+				placeholder={m.mcp_servers_search_placeholder()}
+				emptyMessage={m.mcp_servers_no_results()}
 				isEmpty={filteredMcpServers.length === 0}
 			>
 				<div class="max-h-64 overflow-y-auto">
@@ -129,7 +130,7 @@
 									<span
 										class="shrink-0 rounded bg-destructive/15 px-1.5 py-0.5 text-xs text-destructive"
 									>
-										Error
+										{m.server_status_error()}
 									</span>
 								{/if}
 							</div>
@@ -151,7 +152,7 @@
 					>
 						<Settings class="h-4 w-4" />
 
-						<span>Manage MCP Servers</span>
+						<span>{m.mcp_servers_manage()}</span>
 					</DropdownMenu.Item>
 				{/snippet}
 			</DropdownMenuSearchable>

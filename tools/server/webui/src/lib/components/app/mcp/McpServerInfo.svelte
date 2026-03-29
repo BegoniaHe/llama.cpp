@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { ChevronDown, ChevronRight } from '@lucide/svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible';
+	import { m } from '$lib/paraglide/messages';
+	import { ChevronDown, ChevronRight } from '@lucide/svelte';
 
 	interface Props {
 		instructions?: string;
@@ -23,7 +24,7 @@
 				<ChevronRight class="h-3.5 w-3.5" />
 			{/if}
 
-			<span>Server instructions</span>
+			<span>{m.mcp_server_info_instructions()}</span>
 		</Collapsible.Trigger>
 
 		<Collapsible.Content class="mt-2">

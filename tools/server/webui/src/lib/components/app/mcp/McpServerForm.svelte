@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { KeyValuePairs } from '$lib/components/app';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
-	import { KeyValuePairs } from '$lib/components/app';
+	import { MCP_SERVER_URL_PLACEHOLDER } from '$lib/constants';
+	import { UrlProtocol } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
 	import type { KeyValuePair } from '$lib/types';
 	import { parseHeadersToArray, serializeHeaders } from '$lib/utils';
-	import { UrlProtocol } from '$lib/enums';
-	import { MCP_SERVER_URL_PLACEHOLDER } from '$lib/constants';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
 
 	interface Props {
 		url: string;
@@ -46,7 +47,7 @@
 <div class="grid gap-3">
 	<div>
 		<label for="server-url-{id}" class="mb-2 block text-xs font-medium">
-			Server URL <span class="text-destructive">*</span>
+			{m.mcp_server_form_url_label()} <span class="text-destructive">*</span>
 		</label>
 
 		<Input
@@ -77,16 +78,16 @@
 				/>
 
 				<span>
-					<span class="text-xs text-muted-foreground">Use llama-server proxy</span>
+					<span class="text-xs text-muted-foreground">{m.mcp_server_form_use_proxy()}</span>
 
 					<br />
 
 					{#if !mcpStore.isProxyAvailable}
 						<span class="inline-flex gap-0.75 text-xs text-muted-foreground/60"
-							>(Run <pre>llama-server</pre>
-							with
+							>({m.mcp_server_form_proxy_hint_prefix()} <pre>llama-server</pre>
+							{m.mcp_server_form_proxy_hint_with()}
 							<pre>--webui-mcp-proxy</pre>
-							flag)</span
+							{m.mcp_server_form_proxy_hint_suffix()})</span
 						>
 					{/if}
 				</span>
@@ -98,11 +99,11 @@
 		class="mt-2"
 		pairs={headerPairs}
 		onPairsChange={updateHeaderPairs}
-		keyPlaceholder="Header name"
-		valuePlaceholder="Value"
-		addButtonLabel="Add"
-		emptyMessage="No custom headers configured."
-		sectionLabel="Custom Headers"
+		keyPlaceholder={m.mcp_server_form_header_name_placeholder()}
+		valuePlaceholder={m.mcp_server_form_header_value_placeholder()}
+		addButtonLabel={m.mcp_servers_add_button()}
+		emptyMessage={m.mcp_server_form_headers_empty()}
+		sectionLabel={m.mcp_server_form_headers_label()}
 		sectionLabelOptional
 	/>
 </div>

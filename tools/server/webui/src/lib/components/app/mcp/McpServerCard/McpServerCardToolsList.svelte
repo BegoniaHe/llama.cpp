@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { ChevronDown, ChevronRight } from '@lucide/svelte';
-	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { Badge } from '$lib/components/ui/badge';
+	import * as Collapsible from '$lib/components/ui/collapsible';
+	import * as m from '$lib/paraglide/messages';
+	import { ChevronDown, ChevronRight } from '@lucide/svelte';
 
 	interface Tool {
 		name: string;
@@ -28,7 +29,7 @@
 			<ChevronRight class="h-3.5 w-3.5" />
 		{/if}
 
-		<span>{toolsCount} tools available · Show details</span>
+		<span>{m.mcp_server_tools_summary({ count: toolsCount })}</span>
 	</Collapsible.Trigger>
 
 	<Collapsible.Content class="mt-2">

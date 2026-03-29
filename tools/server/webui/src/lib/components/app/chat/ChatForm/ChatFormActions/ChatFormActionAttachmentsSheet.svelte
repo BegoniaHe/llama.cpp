@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Plus, MessageSquare, Zap, FolderOpen } from '@lucide/svelte';
+	import { McpLogo } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { FILE_TYPE_ICONS } from '$lib/constants';
-	import { McpLogo } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
+	import { FolderOpen, MessageSquare, Plus, Zap } from '@lucide/svelte';
 
 	interface Props {
 		class?: string;
@@ -59,7 +60,7 @@
 		onSystemPromptClick?.();
 	}
 
-	const fileUploadTooltipText = 'Add files, system prompt or MCP Servers';
+	const fileUploadTooltipText = m.chat_attachment_add_menu_tooltip();
 
 	const sheetItemClass =
 		'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent active:bg-accent disabled:cursor-not-allowed disabled:opacity-50';
@@ -81,10 +82,10 @@
 
 		<Sheet.Content side="bottom" class="max-h-[85vh] gap-0">
 			<Sheet.Header>
-				<Sheet.Title>Add to chat</Sheet.Title>
+				<Sheet.Title>{m.chat_attachment_sheet_title()}</Sheet.Title>
 
 				<Sheet.Description class="sr-only">
-					Add files, system prompt or configure MCP servers
+					{m.chat_attachment_sheet_description()}
 				</Sheet.Description>
 			</Sheet.Header>
 
@@ -98,10 +99,10 @@
 				>
 					<FILE_TYPE_ICONS.image class="h-4 w-4 shrink-0" />
 
-					<span>Images</span>
+					<span>{m.chat_attachment_images()}</span>
 
 					{#if !hasVisionModality}
-						<span class="ml-auto text-xs text-muted-foreground">Requires vision model</span>
+						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_requires_vision_model()}</span>
 					{/if}
 				</button>
 
@@ -114,46 +115,46 @@
 				>
 					<FILE_TYPE_ICONS.audio class="h-4 w-4 shrink-0" />
 
-					<span>Audio Files</span>
+					<span>{m.chat_attachment_audio_files()}</span>
 
 					{#if !hasAudioModality}
-						<span class="ml-auto text-xs text-muted-foreground">Requires audio model</span>
+						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_requires_audio_model()}</span>
 					{/if}
 				</button>
 
 				<button type="button" class={sheetItemClass} onclick={handleSheetFileUpload}>
 					<FILE_TYPE_ICONS.text class="h-4 w-4 shrink-0" />
 
-					<span>Text Files</span>
+					<span>{m.chat_attachment_text_files()}</span>
 				</button>
 
 				<button type="button" class={sheetItemClass} onclick={handleSheetFileUpload}>
 					<FILE_TYPE_ICONS.pdf class="h-4 w-4 shrink-0" />
 
-					<span>PDF Files</span>
+					<span>{m.chat_attachment_pdf_files()}</span>
 
 					{#if !hasVisionModality}
-						<span class="ml-auto text-xs text-muted-foreground">Text-only</span>
+						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_text_only()}</span>
 					{/if}
 				</button>
 
 				<button type="button" class={sheetItemClass} onclick={handleSheetSystemPromptClick}>
 					<MessageSquare class="h-4 w-4 shrink-0" />
 
-					<span>System Message</span>
+					<span>{m.settings_field_system_message_label()}</span>
 				</button>
 
 				<button type="button" class={sheetItemClass} onclick={handleMcpSettingsClick}>
 					<McpLogo class="h-4 w-4 shrink-0" />
 
-					<span>MCP Servers</span>
+					<span>{m.chat_sidebar_mcp_servers()}</span>
 				</button>
 
 				{#if hasMcpPromptsSupport}
 					<button type="button" class={sheetItemClass} onclick={handleMcpPromptClick}>
 						<Zap class="h-4 w-4 shrink-0" />
 
-						<span>MCP Prompt</span>
+						<span>{m.attachment_label_mcp_prompt()}</span>
 					</button>
 				{/if}
 
@@ -161,7 +162,7 @@
 					<button type="button" class={sheetItemClass} onclick={handleMcpResourcesClick}>
 						<FolderOpen class="h-4 w-4 shrink-0" />
 
-						<span>MCP Resources</span>
+						<span>{m.mcp_resources_title()}</span>
 					</button>
 				{/if}
 			</div>

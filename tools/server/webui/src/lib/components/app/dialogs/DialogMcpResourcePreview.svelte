@@ -1,18 +1,19 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { Download } from '@lucide/svelte';
+	import { ActionIconCopyToClipboard, SyntaxHighlightedCode } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { DEFAULT_RESOURCE_FILENAME } from '$lib/constants';
+	import { MimeTypeIncludes, MimeTypeText } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { SyntaxHighlightedCode, ActionIconCopyToClipboard } from '$lib/components/app';
+	import type { DatabaseMessageExtraMcpResource } from '$lib/types';
 	import {
+		downloadResourceContent,
 		getLanguageFromFilename,
 		isCodeResource,
-		isImageResource,
-		downloadResourceContent
+		isImageResource
 	} from '$lib/utils';
-	import { MimeTypeIncludes, MimeTypeText } from '$lib/enums';
-	import { DEFAULT_RESOURCE_FILENAME } from '$lib/constants';
-	import type { DatabaseMessageExtraMcpResource } from '$lib/types';
+	import { Download } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
@@ -80,7 +81,7 @@
 			<ActionIconCopyToClipboard
 				text={extra.content}
 				canCopy={!!extra.content}
-				ariaLabel="Copy content"
+				ariaLabel={m.mcp_action_copy_content()}
 			/>
 
 			<Button
@@ -89,7 +90,7 @@
 				class="h-7 w-7 p-0"
 				onclick={handleDownload}
 				disabled={!extra.content}
-				title="Download content"
+				title={m.mcp_action_download_content()}
 			>
 				<Download class="h-3.5 w-3.5" />
 			</Button>
@@ -112,7 +113,7 @@
 				<pre
 					class="max-h-[70vh] overflow-auto rounded-md border bg-muted/30 p-4 font-mono text-sm break-words whitespace-pre-wrap">{extra.content}</pre>
 			{:else}
-				<div class="py-8 text-center text-sm text-muted-foreground">No content available</div>
+				<div class="py-8 text-center text-sm text-muted-foreground">{m.mcp_resource_no_content_available()}</div>
 			{/if}
 		</div>
 	</Dialog.Content>

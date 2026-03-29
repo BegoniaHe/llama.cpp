@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { RefreshCw, Loader2 } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
 	import { SearchInput } from '$lib/components/app/forms';
+	import { Button } from '$lib/components/ui/button';
+	import * as m from '$lib/paraglide/messages';
+	import { Loader2, RefreshCw } from '@lucide/svelte';
 
 	interface Props {
 		isLoading: boolean;
@@ -16,7 +17,7 @@
 <div class="flex flex-col gap-2">
 	<div class="mb-2 flex items-center gap-4">
 		<SearchInput
-			placeholder="Search resources..."
+			placeholder={m.mcp_resource_browser_search_placeholder()}
 			value={searchQuery}
 			onInput={(value) => onSearch?.(value)}
 		/>
@@ -27,7 +28,7 @@
 			class="h-8 w-8 p-0"
 			onclick={onRefresh}
 			disabled={isLoading}
-			title="Refresh resources"
+			title={m.mcp_resource_browser_refresh_title()}
 		>
 			{#if isLoading}
 				<Loader2 class="h-4 w-4 animate-spin" />
@@ -37,5 +38,5 @@
 		</Button>
 	</div>
 
-	<h3 class="text-sm font-medium">Available resources</h3>
+	<h3 class="text-sm font-medium">{m.mcp_resource_browser_available_title()}</h3>
 </div>

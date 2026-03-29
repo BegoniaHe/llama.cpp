@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { FolderOpen, ChevronDown, ChevronRight, Loader2, Braces } from '@lucide/svelte';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { cn } from '$lib/components/ui/utils';
+	import * as m from '$lib/paraglide/messages';
 	import { mcpStore } from '$lib/stores/mcp.svelte';
 	import type { MCPResourceInfo, MCPResourceTemplateInfo, MCPServerResources } from '$lib/types';
+	import { getDisplayName, getResourceIcon } from '$lib/utils';
+	import { Braces, ChevronDown, ChevronRight, FolderOpen, Loader2 } from '@lucide/svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import {
 		type ResourceTreeNode,
@@ -12,7 +14,6 @@
 		countTreeResources,
 		sortTreeChildren
 	} from './mcp-resource-browser';
-	import { getDisplayName, getResourceIcon } from '$lib/utils';
 
 	interface Props {
 		serverName: string;
@@ -75,6 +76,13 @@
 	function isResourceSelected(resource: MCPResourceInfo): boolean {
 		return selectedUris.has(resource.uri);
 	}
+
+	const resourceCountText = $derived(
+		m.mcp_resource_browser_resource_count({ count: serverRes.resources.length })
+	);
+	const templateCountText = $derived(
+		m.mcp_resource_browser_template_count({ count: serverRes.templates.length })
+	);
 </script>
 
 {#snippet renderTreeNode(node: ResourceTreeNode, depth: number, parentPath: string)}
@@ -171,12 +179,7 @@
 			</span>
 
 			<span class="text-xs text-muted-foreground">
-				({serverRes.resources.length} resource{serverRes.resources.length !== 1
-					? 's'
-					: ''}{#if hasTemplates}, {serverRes.templates.length} template{serverRes.templates
-						.length !== 1
-						? 's'
-						: ''}{/if})
+				({resourceCountText}{#if hasTemplates}, {templateCountText}{/if})
 			</span>
 		</span>
 
@@ -189,10 +192,10 @@
 		<div class="ml-4 flex flex-col gap-0.5 border-l border-border/50 pl-2">
 			{#if serverRes.error}
 				<div class="py-1 text-xs text-red-500">
-					Error: {serverRes.error}
+					{m.mcp_resource_browser_error({ error: serverRes.error })}
 				</div>
 			{:else if !hasContent}
-				<div class="py-1 text-xs text-muted-foreground">No resources</div>
+				<div class="py-1 text-xs text-muted-foreground">{m.mcp_resource_browser_no_resources()}</div>
 			{:else}
 				{#if hasResources}
 					{#each sortTreeChildren( [...resourceTree.children.values()] ) as child (child.resource?.uri || `${serverName}:${child.name}`)}
@@ -208,7 +211,7 @@
 					<div
 						class="py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase"
 					>
-						Templates
+						{m.mcp_resource_browser_templates_heading()}
 					</div>
 
 					{#each templateInfos as template (template.uriTemplate)}

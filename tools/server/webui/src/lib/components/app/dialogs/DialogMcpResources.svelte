@@ -1,22 +1,23 @@
 <script lang="ts">
-	import { FolderOpen, Plus, Loader2, Braces } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import {
-		mcpResources,
-		mcpTotalResourceCount,
-		mcpResourceStore
-	} from '$lib/stores/mcp-resources.svelte';
 	import {
 		McpResourceBrowser,
 		McpResourcePreview,
 		McpResourceTemplateForm
 	} from '$lib/components/app';
+	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { m } from '$lib/paraglide/messages';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import {
+		mcpResources,
+		mcpResourceStore,
+		mcpTotalResourceCount
+	} from '$lib/stores/mcp-resources.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import type { MCPResourceContent, MCPResourceInfo, MCPResourceTemplateInfo } from '$lib/types';
 	import { getResourceDisplayName } from '$lib/utils';
-	import type { MCPResourceInfo, MCPResourceContent, MCPResourceTemplateInfo } from '$lib/types';
+	import { Braces, FolderOpen, Loader2, Plus } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 	import { SvelteSet } from 'svelte/reactivity';
 
 	interface Props {
@@ -112,10 +113,10 @@
 			if (content) {
 				templatePreviewContent = content;
 			} else {
-				templatePreviewError = 'Failed to read resource';
+				templatePreviewError = m.mcp_resource_error_failed_to_read();
 			}
 		} catch (error) {
-			templatePreviewError = error instanceof Error ? error.message : 'Unknown error';
+			templatePreviewError = error instanceof Error ? error.message : m.mcp_resource_error_unknown();
 		} finally {
 			templatePreviewLoading = false;
 		}
@@ -138,10 +139,12 @@
 					await mcpStore.attachResource(knownResource.uri);
 				}
 
-				toast.success(`Resource attached: ${knownResource.title || knownResource.name}`);
+				toast.success(
+					m.mcp_resource_attached_single({ title: knownResource.title || knownResource.name })
+				);
 			} else {
 				if (mcpResourceStore.isAttached(templatePreviewUri)) {
-					toast.info('Resource already attached');
+					toast.info(m.mcp_resource_already_attached());
 					handleOpenChange(false);
 					return;
 				}
@@ -155,7 +158,7 @@
 				const attachment = mcpResourceStore.addAttachment(resourceInfo);
 				mcpResourceStore.updateAttachmentContent(attachment.id, templatePreviewContent);
 
-				toast.success(`Resource attached: ${resourceInfo.name}`);
+				toast.success(m.mcp_resource_attached_single({ title: resourceInfo.name }));
 			}
 
 			handleOpenChange(false);
@@ -236,8 +239,8 @@
 
 			toast.success(
 				count === 1
-					? `Resource attached: ${resourcesToAttach[0].name}`
-					: `${count} resources attached`
+					? m.mcp_resource_attached_single({ title: resourcesToAttach[0].name })
+					: m.mcp_resource_attached_multiple({ count: String(count) })
 			);
 
 			handleOpenChange(false);
@@ -261,7 +264,7 @@
 			<Dialog.Title class="flex items-center gap-2">
 				<FolderOpen class="h-5 w-5" />
 
-				<span>MCP Resources</span>
+				<span>{m.mcp_resources_title()}</span>
 
 				{#if totalCount > 0}
 					<span class="text-sm font-normal text-muted-foreground">({totalCount})</span>
@@ -269,7 +272,7 @@
 			</Dialog.Title>
 
 			<Dialog.Description>
-				Browse and attach resources from connected MCP servers to your chat context.
+				{m.mcp_resources_description()}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -323,7 +326,7 @@
 										templatePreviewError = null;
 									}}
 								>
-									Try again
+									{m.mcp_action_try_again()}
 								</Button>
 							</div>
 						{:else}
@@ -359,14 +362,14 @@
 					</div>
 				{:else}
 					<div class="flex h-full items-center justify-center text-sm text-muted-foreground">
-						Select a resource to preview
+						{m.mcp_resource_select_to_preview()}
 					</div>
 				{/if}
 			</div>
 		</div>
 
 		<Dialog.Footer class="border-t border-border/30 px-6 py-4">
-			<Button variant="outline" onclick={() => handleOpenChange(false)}>Cancel</Button>
+			<Button variant="outline" onclick={() => handleOpenChange(false)}>{m.chat_sidebar_cancel()}</Button>
 
 			{#if hasTemplateResult}
 				<Button onclick={handleAttachTemplateResource} disabled={isAttaching}>
@@ -376,7 +379,7 @@
 						<Plus class="mr-2 h-4 w-4" />
 					{/if}
 
-					Attach Resource
+					{m.mcp_action_attach_resource()}
 				</Button>
 			{:else}
 				<Button onclick={handleAttach} disabled={selectedResources.size === 0 || isAttaching}>
@@ -386,7 +389,9 @@
 						<Plus class="mr-2 h-4 w-4" />
 					{/if}
 
-					Attach {selectedResources.size > 0 ? `(${selectedResources.size})` : 'Resource'}
+					{selectedResources.size > 0
+						? m.mcp_action_attach_count({ count: String(selectedResources.size) })
+						: m.mcp_action_attach_resource()}
 				</Button>
 			{/if}
 		</Dialog.Footer>

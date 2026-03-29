@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, MessageSquare, Settings, Zap, FolderOpen } from '@lucide/svelte';
+	import { DropdownMenuSearchable, McpLogo } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Switch } from '$lib/components/ui/switch';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { FILE_TYPE_ICONS, TOOLTIP_DELAY_DURATION } from '$lib/constants';
-	import { McpLogo, DropdownMenuSearchable } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { FolderOpen, MessageSquare, Plus, Settings, Zap } from '@lucide/svelte';
 
 	import { HealthCheckStatus } from '$lib/enums';
 	import type { MCPServerSettingsEntry } from '$lib/types';
@@ -45,8 +46,8 @@
 
 	let systemMessageTooltip = $derived(
 		isNewChat
-			? 'Add custom system message for a new conversation'
-			: 'Inject custom system message at the beginning of the conversation'
+			? m.chat_attachment_system_message_tooltip_new()
+			: m.chat_attachment_system_message_tooltip_existing()
 	);
 
 	let dropdownOpen = $state(false);
@@ -98,12 +99,12 @@
 		onMcpResourcesClick?.();
 	}
 
-	const fileUploadTooltipText = 'Add files, system prompt or MCP Servers';
+	const fileUploadTooltipText = m.chat_attachment_add_menu_tooltip();
 </script>
 
 <div class="flex items-center gap-1 {className}">
 	<DropdownMenu.Root bind:open={dropdownOpen}>
-		<DropdownMenu.Trigger name="Attach files" {disabled}>
+		<DropdownMenu.Trigger name={m.chat_attachment_trigger_name()} {disabled}>
 			<Tooltip.Root>
 				<Tooltip.Trigger class="w-full">
 					<Button
@@ -132,7 +133,7 @@
 				>
 					<FILE_TYPE_ICONS.image class="h-4 w-4" />
 
-					<span>Images</span>
+					<span>{m.chat_attachment_images()}</span>
 				</DropdownMenu.Item>
 			{:else}
 				<Tooltip.Root delayDuration={TOOLTIP_DELAY_DURATION}>
@@ -143,12 +144,12 @@
 						>
 							<FILE_TYPE_ICONS.image class="h-4 w-4" />
 
-							<span>Images</span>
+							<span>{m.chat_attachment_images()}</span>
 						</DropdownMenu.Item>
 					</Tooltip.Trigger>
 
 					<Tooltip.Content side="right">
-						<p>Image processing requires a vision model</p>
+						<p>{m.chat_attachment_image_requires_vision_model()}</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			{/if}
@@ -160,7 +161,7 @@
 				>
 					<FILE_TYPE_ICONS.audio class="h-4 w-4" />
 
-					<span>Audio Files</span>
+					<span>{m.chat_attachment_audio_files()}</span>
 				</DropdownMenu.Item>
 			{:else}
 				<Tooltip.Root delayDuration={TOOLTIP_DELAY_DURATION}>
@@ -168,12 +169,12 @@
 						<DropdownMenu.Item class="audio-button flex cursor-pointer items-center gap-2" disabled>
 							<FILE_TYPE_ICONS.audio class="h-4 w-4" />
 
-							<span>Audio Files</span>
+							<span>{m.chat_attachment_audio_files()}</span>
 						</DropdownMenu.Item>
 					</Tooltip.Trigger>
 
 					<Tooltip.Content side="right">
-						<p>Audio files processing requires an audio model</p>
+						<p>{m.chat_attachment_audio_requires_audio_model()}</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			{/if}
@@ -184,7 +185,7 @@
 			>
 				<FILE_TYPE_ICONS.text class="h-4 w-4" />
 
-				<span>Text Files</span>
+				<span>{m.chat_attachment_text_files()}</span>
 			</DropdownMenu.Item>
 
 			{#if hasVisionModality}
@@ -194,7 +195,7 @@
 				>
 					<FILE_TYPE_ICONS.pdf class="h-4 w-4" />
 
-					<span>PDF Files</span>
+					<span>{m.chat_attachment_pdf_files()}</span>
 				</DropdownMenu.Item>
 			{:else}
 				<Tooltip.Root delayDuration={TOOLTIP_DELAY_DURATION}>
@@ -205,12 +206,12 @@
 						>
 							<FILE_TYPE_ICONS.pdf class="h-4 w-4" />
 
-							<span>PDF Files</span>
+							<span>{m.chat_attachment_pdf_files()}</span>
 						</DropdownMenu.Item>
 					</Tooltip.Trigger>
 
 					<Tooltip.Content side="right">
-						<p>PDFs will be converted to text. Image-based PDFs may not work properly.</p>
+						<p>{m.chat_attachment_pdf_text_only_tooltip()}</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			{/if}
@@ -223,7 +224,7 @@
 					>
 						<MessageSquare class="h-4 w-4" />
 
-						<span>System Message</span>
+						<span>{m.settings_field_system_message_label()}</span>
 					</DropdownMenu.Item>
 				</Tooltip.Trigger>
 
@@ -238,14 +239,14 @@
 				<DropdownMenu.SubTrigger class="flex cursor-pointer items-center gap-2">
 					<McpLogo class="h-4 w-4" />
 
-					<span>MCP Servers</span>
+					<span>{m.chat_sidebar_mcp_servers()}</span>
 				</DropdownMenu.SubTrigger>
 
 				<DropdownMenu.SubContent class="w-72 pt-0">
 					<DropdownMenuSearchable
-						placeholder="Search servers..."
+						placeholder={m.mcp_servers_search_placeholder()}
 						bind:searchValue={mcpSearchQuery}
-						emptyMessage={hasMcpServers ? 'No servers found' : 'No MCP servers configured'}
+						emptyMessage={hasMcpServers ? m.mcp_servers_no_results() : m.mcp_servers_none_configured()}
 						isEmpty={filteredMcpServers.length === 0}
 					>
 						<div class="max-h-64 overflow-y-auto">
@@ -278,7 +279,7 @@
 											<span
 												class="shrink-0 rounded bg-destructive/15 px-1.5 py-0.5 text-xs text-destructive"
 											>
-												Error
+												{m.server_status_error()}
 											</span>
 										{/if}
 									</div>
@@ -300,7 +301,7 @@
 							>
 								<Settings class="h-4 w-4" />
 
-								<span>Manage MCP Servers</span>
+								<span>{m.mcp_servers_manage()}</span>
 							</DropdownMenu.Item>
 						{/snippet}
 					</DropdownMenuSearchable>
@@ -314,7 +315,7 @@
 				>
 					<Zap class="h-4 w-4" />
 
-					<span>MCP Prompt</span>
+					<span>{m.attachment_label_mcp_prompt()}</span>
 				</DropdownMenu.Item>
 			{/if}
 
@@ -325,7 +326,7 @@
 				>
 					<FolderOpen class="h-4 w-4" />
 
-					<span>MCP Resources</span>
+					<span>{m.mcp_resources_title()}</span>
 				</DropdownMenu.Item>
 			{/if}
 		</DropdownMenu.Content>

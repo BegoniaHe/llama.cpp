@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { Plus } from '@lucide/svelte';
+	import { McpServerCard, McpServerCardSkeleton, McpServerForm } from '$lib/components/app/mcp';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { uuid } from '$lib/utils';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { McpServerCard, McpServerCardSkeleton, McpServerForm } from '$lib/components/app/mcp';
 	import { MCP_SERVER_ID_PREFIX } from '$lib/constants';
 	import { HealthCheckStatus } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { uuid } from '$lib/utils';
+	import { Plus } from '@lucide/svelte';
 
 	let servers = $derived(mcpStore.getServersSorted());
 
@@ -35,13 +36,13 @@
 	let newServerUrl = $state('');
 	let newServerHeaders = $state('');
 	let newServerUrlError = $derived.by(() => {
-		if (!newServerUrl.trim()) return 'URL is required';
+		if (!newServerUrl.trim()) return m.mcp_server_form_url_required();
 		try {
 			new URL(newServerUrl);
 
 			return null;
 		} catch {
-			return 'Invalid URL format';
+			return m.mcp_server_form_url_invalid();
 		}
 	});
 
@@ -80,14 +81,14 @@
 <div class="space-y-5 md:space-y-4">
 	<div class="flex items-start justify-between gap-4">
 		<div>
-			<h4 class="text-base font-semibold">Manage Servers</h4>
+			<h4 class="text-base font-semibold">{m.mcp_servers_manage_title()}</h4>
 		</div>
 
 		{#if !isAddingServer}
 			<Button variant="outline" size="sm" class="shrink-0" onclick={showAddServerForm}>
 				<Plus class="h-4 w-4" />
 
-				Add New Server
+				{m.mcp_servers_add_new_title()}
 			</Button>
 		{/if}
 	</div>
@@ -95,7 +96,7 @@
 	{#if isAddingServer}
 		<Card.Root class="bg-muted/30 p-4">
 			<div class="space-y-4">
-				<p class="font-medium">Add New Server</p>
+				<p class="font-medium">{m.mcp_servers_add_new_title()}</p>
 
 				<McpServerForm
 					url={newServerUrl}
@@ -107,16 +108,16 @@
 				/>
 
 				<div class="flex items-center justify-end gap-2">
-					<Button variant="secondary" size="sm" onclick={cancelAddServer}>Cancel</Button>
+					<Button variant="secondary" size="sm" onclick={cancelAddServer}>{m.chat_sidebar_cancel()}</Button>
 
 					<Button
 						variant="default"
 						size="sm"
 						onclick={saveNewServer}
 						disabled={!!newServerUrlError}
-						aria-label="Save"
+						aria-label={m.mcp_servers_add_button()}
 					>
-						Add
+						{m.mcp_servers_add_button()}
 					</Button>
 				</div>
 			</div>
@@ -125,7 +126,7 @@
 
 	{#if servers.length === 0 && !isAddingServer}
 		<div class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-			No MCP Servers configured yet. Add one to enable agentic features.
+			{m.mcp_servers_empty_state()}
 		</div>
 	{/if}
 

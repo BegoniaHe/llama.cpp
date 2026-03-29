@@ -1,19 +1,20 @@
 <script lang="ts">
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { mcpResourceStore } from '$lib/stores/mcp-resources.svelte';
-	import { KeyboardKey } from '$lib/enums';
-	import type { MCPResourceInfo, MCPServerSettingsEntry } from '$lib/types';
-	import { SvelteMap } from 'svelte/reactivity';
-	import { FolderOpen } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
 	import {
-		ChatFormPickerPopover,
+		ChatFormPickerItemHeader,
 		ChatFormPickerList,
 		ChatFormPickerListItem,
-		ChatFormPickerItemHeader,
-		ChatFormPickerListItemSkeleton
+		ChatFormPickerListItemSkeleton,
+		ChatFormPickerPopover
 	} from '$lib/components/app/chat';
+	import { Button } from '$lib/components/ui/button';
+	import { KeyboardKey } from '$lib/enums';
+	import * as m from '$lib/paraglide/messages';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { mcpResourceStore } from '$lib/stores/mcp-resources.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import type { MCPResourceInfo, MCPServerSettingsEntry } from '$lib/types';
+	import { FolderOpen } from '@lucide/svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	interface Props {
 		class?: string;
@@ -165,7 +166,7 @@
 <ChatFormPickerPopover
 	bind:isOpen
 	class={className}
-	srLabel="Open resource picker"
+	srLabel={m.mcp_resource_picker_open()}
 	{onClose}
 	onKeydown={handleKeydown}
 >
@@ -175,8 +176,8 @@
 		{selectedIndex}
 		bind:searchQuery={internalSearchQuery}
 		{showSearchInput}
-		searchPlaceholder="Search resources..."
-		emptyMessage="No MCP resources available"
+		searchPlaceholder={m.mcp_resource_picker_search_placeholder()}
+		emptyMessage={m.mcp_resource_picker_empty()}
 		itemKey={(resource) => resource.serverName + ':' + resource.uri}
 	>
 		{#snippet item(resource, index, isSelected)}
@@ -199,7 +200,7 @@
 							<span
 								class="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
 							>
-								attached
+								{m.mcp_resource_already_attached()}
 							</span>
 						{/if}
 					{/snippet}
@@ -228,7 +229,7 @@
 				>
 					<FolderOpen class="h-3 w-3" />
 
-					Browse all
+					{m.mcp_resource_picker_browse_all()}
 				</Button>
 			{/if}
 		{/snippet}

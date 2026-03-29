@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
 	import { InputWithSuggestions } from '$lib/components/app';
-	import { KeyboardKey } from '$lib/enums';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { MIN_AUTOCOMPLETE_INPUT_LENGTH } from '$lib/constants';
+	import { KeyboardKey } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
 	import type { MCPResourceTemplateInfo } from '$lib/types';
 	import {
 		debounce,
-		extractTemplateVariables,
 		expandTemplate,
+		extractTemplateVariables,
 		isTemplateComplete
 	} from '$lib/utils';
 
@@ -157,15 +158,15 @@
 
 	{#if isComplete}
 		<div class="rounded-md bg-muted/50 px-3 py-2">
-			<p class="text-xs text-muted-foreground">Resolved URI:</p>
+			<p class="text-xs text-muted-foreground">{m.mcp_resource_resolved_uri()}</p>
 
 			<p class="mt-0.5 font-mono text-xs break-all">{expandedUri}</p>
 		</div>
 	{/if}
 
 	<div class="flex justify-end gap-2 pt-1">
-		<Button type="button" size="sm" variant="secondary" onclick={onCancel}>Cancel</Button>
+		<Button type="button" size="sm" variant="secondary" onclick={onCancel}>{m.chat_sidebar_cancel()}</Button>
 
-		<Button size="sm" type="submit" disabled={!isComplete}>Read Resource</Button>
+		<Button size="sm" type="submit" disabled={!isComplete}>{m.mcp_action_read_resource()}</Button>
 	</div>
 </form>

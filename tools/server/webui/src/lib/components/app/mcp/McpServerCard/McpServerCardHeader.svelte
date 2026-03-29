@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Cable, ExternalLink } from '@lucide/svelte';
-	import { Switch } from '$lib/components/ui/switch';
-	import { Badge } from '$lib/components/ui/badge';
 	import { McpCapabilitiesBadges } from '$lib/components/app/mcp';
-	import { MCP_TRANSPORT_LABELS, MCP_TRANSPORT_ICONS } from '$lib/constants';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Switch } from '$lib/components/ui/switch';
+	import { MCP_TRANSPORT_ICONS, MCP_TRANSPORT_LABELS } from '$lib/constants';
 	import { MCPTransportType } from '$lib/enums';
-	import type { MCPServerInfo, MCPCapabilitiesInfo } from '$lib/types';
+	import * as m from '$lib/paraglide/messages';
+	import type { MCPCapabilitiesInfo, MCPServerInfo } from '$lib/types';
+	import { Cable, ExternalLink } from '@lucide/svelte';
 
 	interface Props {
 		displayName: string;
@@ -63,7 +64,7 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						class="shrink-0 text-muted-foreground hover:text-foreground"
-						aria-label="Open website"
+						aria-label={m.mcp_server_open_website()}
 					>
 						<ExternalLink class="h-3 w-3" />
 					</a>
