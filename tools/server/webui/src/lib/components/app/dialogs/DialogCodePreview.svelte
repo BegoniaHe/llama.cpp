@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Dialog as DialogPrimitive } from 'bits-ui';
+	import * as m from '$lib/paraglide/messages';
 	import XIcon from '@lucide/svelte/icons/x';
+	import { Dialog as DialogPrimitive } from 'bits-ui';
 
 	interface Props {
 		open: boolean;
@@ -36,17 +37,17 @@
 		<DialogPrimitive.Content class="code-preview-content">
 			<iframe
 				bind:this={iframeRef}
-				title="Preview {language}"
+				title={m.dialog_code_preview_iframe_title({ language })}
 				sandbox="allow-scripts"
 				class="code-preview-iframe"
 			></iframe>
 
 			<DialogPrimitive.Close
 				class="code-preview-close absolute top-4 right-4 border-none bg-transparent text-white opacity-70 mix-blend-difference transition-opacity hover:opacity-100 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-8"
-				aria-label="Close preview"
+				aria-label={m.dialog_code_preview_close()}
 			>
 				<XIcon />
-				<span class="sr-only">Close preview</span>
+				<span class="sr-only">{m.dialog_code_preview_close()}</span>
 			</DialogPrimitive.Close>
 		</DialogPrimitive.Content>
 	</DialogPrimitive.Portal>

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { ConversationSelection } from '$lib/components/app';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as m from '$lib/paraglide/messages';
 
 	interface Props {
 		conversations: DatabaseConversation[];
@@ -42,15 +43,15 @@
 		<Dialog.Content class="z-[1000001] max-w-2xl">
 			<Dialog.Header>
 				<Dialog.Title>
-					Select Conversations to {mode === 'export' ? 'Export' : 'Import'}
+					{mode === 'export'
+						? m.dialog_conversation_selection_title_export()
+						: m.dialog_conversation_selection_title_import()}
 				</Dialog.Title>
 				<Dialog.Description>
 					{#if mode === 'export'}
-						Choose which conversations you want to export. Selected conversations will be downloaded
-						as a JSON file.
+						{m.dialog_conversation_selection_description_export()}
 					{:else}
-						Choose which conversations you want to import. Selected conversations will be merged
-						with your existing conversations.
+						{m.dialog_conversation_selection_description_import()}
 					{/if}
 				</Dialog.Description>
 			</Dialog.Header>

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Package } from '@lucide/svelte';
-	import { BadgeInfo, ActionIconCopyToClipboard } from '$lib/components/app';
-	import ModelId from './ModelId.svelte';
+	import { ActionIconCopyToClipboard, BadgeInfo } from '$lib/components/app';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as m from '$lib/paraglide/messages';
 	import { modelsStore } from '$lib/stores/models.svelte';
 	import { serverStore } from '$lib/stores/server.svelte';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { Package } from '@lucide/svelte';
+	import ModelId from './ModelId.svelte';
 
 	interface Props {
 		class?: string;
@@ -38,7 +39,7 @@
 		{/if}
 
 		{#if showCopyIcon}
-			<ActionIconCopyToClipboard text={model || ''} ariaLabel="Copy model name" />
+			<ActionIconCopyToClipboard text={model || ''} ariaLabel={m.model_badge_copy_model_name()} />
 		{/if}
 	</BadgeInfo>
 {/snippet}
@@ -51,7 +52,7 @@
 			</Tooltip.Trigger>
 
 			<Tooltip.Content>
-				{onclick ? 'Click for model details' : model}
+				{onclick ? m.model_badge_click_for_details() : model}
 			</Tooltip.Content>
 		</Tooltip.Root>
 	{:else}

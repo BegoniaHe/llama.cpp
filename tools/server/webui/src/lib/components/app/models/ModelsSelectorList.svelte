@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { modelsStore } from '$lib/stores/models.svelte';
 	import { ModelsSelectorOption } from '$lib/components/app';
+	import * as m from '$lib/paraglide/messages';
+	import { modelsStore } from '$lib/stores/models.svelte';
 	import type { GroupedModelOptions, ModelItem } from './utils';
 
 	interface Props {
@@ -46,21 +47,21 @@
 {/snippet}
 
 {#if groups.loaded.length > 0}
-	<p class={sectionHeaderClass}>Loaded models</p>
+	<p class={sectionHeaderClass}>{m.models_section_loaded()}</p>
 	{#each groups.loaded as item (`loaded-${item.option.id}`)}
 		{@render render(item, true)}
 	{/each}
 {/if}
 
 {#if groups.favorites.length > 0}
-	<p class={sectionHeaderClass}>Favorite models</p>
+	<p class={sectionHeaderClass}>{m.models_section_favorites()}</p>
 	{#each groups.favorites as item (`fav-${item.option.id}`)}
 		{@render render(item, true)}
 	{/each}
 {/if}
 
 {#if groups.available.length > 0}
-	<p class={sectionHeaderClass}>Available models</p>
+	<p class={sectionHeaderClass}>{m.models_section_available()}</p>
 	{#each groups.available as group (group.orgName)}
 		{#if group.orgName}
 			<p class={orgHeaderClass}>{group.orgName}</p>

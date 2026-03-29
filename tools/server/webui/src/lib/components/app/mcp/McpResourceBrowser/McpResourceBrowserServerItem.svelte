@@ -195,7 +195,9 @@
 					{m.mcp_resource_browser_error({ error: serverRes.error })}
 				</div>
 			{:else if !hasContent}
-				<div class="py-1 text-xs text-muted-foreground">{m.mcp_resource_browser_no_resources()}</div>
+				<div class="py-1 text-xs text-muted-foreground">
+					{m.mcp_resource_browser_no_resources()}
+				</div>
 			{:else}
 				{#if hasResources}
 					{#each sortTreeChildren( [...resourceTree.children.values()] ) as child (child.resource?.uri || `${serverName}:${child.name}`)}

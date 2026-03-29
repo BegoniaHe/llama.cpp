@@ -1,16 +1,16 @@
 import {
-    AGENTIC_REGEX,
-    ATTACHMENT_LABEL_FILE,
-    ATTACHMENT_LABEL_MCP_PROMPT,
-    ATTACHMENT_LABEL_MCP_RESOURCE,
-    ATTACHMENT_LABEL_PDF_FILE
+	AGENTIC_REGEX,
+	ATTACHMENT_LABEL_FILE,
+	ATTACHMENT_LABEL_MCP_PROMPT,
+	ATTACHMENT_LABEL_MCP_RESOURCE,
+	ATTACHMENT_LABEL_PDF_FILE
 } from '$lib/constants';
 import {
-    AttachmentType,
-    ContentPartType,
-    MessageRole,
-    ReasoningFormat,
-    UrlProtocol
+	AttachmentType,
+	ContentPartType,
+	MessageRole,
+	ReasoningFormat,
+	UrlProtocol
 } from '$lib/enums';
 import { modelsStore } from '$lib/stores/models.svelte';
 import type { DatabaseMessageExtraMcpPrompt, DatabaseMessageExtraMcpResource } from '$lib/types';

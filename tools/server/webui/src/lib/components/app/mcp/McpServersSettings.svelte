@@ -108,7 +108,9 @@
 				/>
 
 				<div class="flex items-center justify-end gap-2">
-					<Button variant="secondary" size="sm" onclick={cancelAddServer}>{m.chat_sidebar_cancel()}</Button>
+					<Button variant="secondary" size="sm" onclick={cancelAddServer}
+						>{m.chat_sidebar_cancel()}</Button
+					>
 
 					<Button
 						variant="default"

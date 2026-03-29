@@ -1,6 +1,7 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { ChatAttachmentPreview } from '$lib/components/app';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as m from '$lib/paraglide/messages';
 	import { formatFileSize } from '$lib/utils';
 
 	interface Props {
@@ -32,7 +33,12 @@
 
 	let chatAttachmentPreviewRef: ChatAttachmentPreview | undefined = $state();
 
-	let displayName = $derived(uploadedFile?.name || attachment?.name || name || 'Unknown File');
+	let displayName = $derived(
+		uploadedFile?.name ||
+			attachment?.name ||
+			name ||
+			m.dialog_chat_attachment_preview_unknown_file()
+	);
 
 	let displaySize = $derived(uploadedFile?.size || size);
 

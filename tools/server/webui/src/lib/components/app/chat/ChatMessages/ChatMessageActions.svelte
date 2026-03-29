@@ -113,7 +113,11 @@
 			{/if}
 
 			{#if role === MessageRole.ASSISTANT && onContinue}
-				<ActionIcon icon={ArrowRight} tooltip={m.chat_message_action_continue()} onclick={onContinue} />
+				<ActionIcon
+					icon={ArrowRight}
+					tooltip={m.chat_message_action_continue()}
+					onclick={onContinue}
+				/>
 			{/if}
 
 			{#if onForkConversation}

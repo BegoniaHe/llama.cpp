@@ -1,6 +1,7 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { ChatAttachmentsViewAll } from '$lib/components/app';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as m from '$lib/paraglide/messages';
 
 	interface Props {
 		open?: boolean;
@@ -35,8 +36,10 @@
 
 		<Dialog.Content class="flex !max-h-[90vh] !max-w-6xl flex-col">
 			<Dialog.Header>
-				<Dialog.Title>All Attachments ({totalCount})</Dialog.Title>
-				<Dialog.Description>View and manage all attached files</Dialog.Description>
+				<Dialog.Title
+					>{m.dialog_chat_attachments_view_all_title({ count: String(totalCount) })}</Dialog.Title
+				>
+				<Dialog.Description>{m.dialog_chat_attachments_view_all_description()}</Dialog.Description>
 			</Dialog.Header>
 
 			<ChatAttachmentsViewAll

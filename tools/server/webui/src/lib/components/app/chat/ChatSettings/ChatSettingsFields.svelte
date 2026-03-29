@@ -80,9 +80,9 @@
 						onConfigChange(field.key, e.currentTarget.value);
 					}}
 					placeholder={sp[field.key] != null
-							? m.settings_field_default_placeholder({
-									value: String(normalizeFloatingPoint(sp[field.key]))
-								})
+						? m.settings_field_default_placeholder({
+								value: String(normalizeFloatingPoint(sp[field.key]))
+							})
 						: ''}
 					class="w-full {isCustomRealTime ? 'pr-8' : ''}"
 				/>

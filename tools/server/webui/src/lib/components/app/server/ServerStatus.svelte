@@ -51,7 +51,9 @@
 
 		{#if serverData?.default_generation_settings?.n_ctx}
 			<Badge variant="secondary" class="text-xs">
-				ctx: {serverData.default_generation_settings.n_ctx.toLocaleString()}
+				{m.server_status_context_size({
+					count: serverData.default_generation_settings.n_ctx.toLocaleString()
+				})}
 			</Badge>
 		{/if}
 	{/if}

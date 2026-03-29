@@ -144,13 +144,17 @@
 						<div class="flex items-center gap-2 rounded bg-muted p-2 text-sm text-muted-foreground">
 							<FileText class="h-4 w-4" />
 
-							<span>{m.mcp_resource_binary_content({ type: blob.mimeType || m.unknown_value() })}</span>
+							<span
+								>{m.mcp_resource_binary_content({ type: blob.mimeType || m.unknown_value() })}</span
+							>
 						</div>
 					{/if}
 				{/each}
 
 				{#if !textContent && blobContent.length === 0}
-						<div class="py-4 text-center text-sm text-muted-foreground">{m.mcp_resource_no_content_available()}</div>
+					<div class="py-4 text-center text-sm text-muted-foreground">
+						{m.mcp_resource_no_content_available()}
+					</div>
 				{/if}
 			{/if}
 		</div>

@@ -102,7 +102,9 @@
 					<span>{m.chat_attachment_images()}</span>
 
 					{#if !hasVisionModality}
-						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_requires_vision_model()}</span>
+						<span class="ml-auto text-xs text-muted-foreground"
+							>{m.chat_attachment_requires_vision_model()}</span
+						>
 					{/if}
 				</button>
 
@@ -118,7 +120,9 @@
 					<span>{m.chat_attachment_audio_files()}</span>
 
 					{#if !hasAudioModality}
-						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_requires_audio_model()}</span>
+						<span class="ml-auto text-xs text-muted-foreground"
+							>{m.chat_attachment_requires_audio_model()}</span
+						>
 					{/if}
 				</button>
 
@@ -134,7 +138,9 @@
 					<span>{m.chat_attachment_pdf_files()}</span>
 
 					{#if !hasVisionModality}
-						<span class="ml-auto text-xs text-muted-foreground">{m.chat_attachment_text_only()}</span>
+						<span class="ml-auto text-xs text-muted-foreground"
+							>{m.chat_attachment_text_only()}</span
+						>
 					{/if}
 				</button>
 

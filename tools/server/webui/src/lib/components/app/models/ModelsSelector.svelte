@@ -1,19 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { ChevronDown, Loader2, Package } from '@lucide/svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { cn } from '$lib/components/ui/utils';
-	import {
-		modelsStore,
-		modelOptions,
-		modelsLoading,
-		modelsUpdating,
-		selectedModelId,
-		singleModelName
-	} from '$lib/stores/models.svelte';
-	import { KeyboardKey } from '$lib/enums';
-	import { isRouterMode } from '$lib/stores/server.svelte';
 	import {
 		DialogModelInformation,
 		DropdownMenuSearchable,
@@ -21,7 +6,23 @@
 		ModelsSelectorList,
 		ModelsSelectorOption
 	} from '$lib/components/app';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { cn } from '$lib/components/ui/utils';
+	import { KeyboardKey } from '$lib/enums';
+	import * as m from '$lib/paraglide/messages';
+	import {
+		modelOptions,
+		modelsLoading,
+		modelsStore,
+		modelsUpdating,
+		selectedModelId,
+		singleModelName
+	} from '$lib/stores/models.svelte';
+	import { isRouterMode } from '$lib/stores/server.svelte';
 	import type { ModelOption } from '$lib/types/models';
+	import { ChevronDown, Loader2, Package } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { filterModelOptions, groupModelOptions, type ModelItem } from './utils';
 
 	interface Props {
@@ -247,7 +248,7 @@
 		<div class="flex items-center gap-2 text-xs text-muted-foreground">
 			<Loader2 class="h-3.5 w-3.5 animate-spin" />
 
-			Loading models…
+			{m.models_loading()}
 		</div>
 	{:else if options.length === 0 && isRouter}
 		{#if currentModel}
@@ -263,7 +264,7 @@
 				<ModelId modelId={currentModel} class="min-w-0" showOrgName />
 			</span>
 		{:else}
-			<p class="text-xs text-muted-foreground">No models available.</p>
+			<p class="text-xs text-muted-foreground">{m.models_empty()}</p>
 		{/if}
 	{:else}
 		{@const selectedOption = getDisplayOption()}
@@ -306,7 +307,7 @@
 							</Tooltip.Content>
 						</Tooltip.Root>
 					{:else}
-						<span class="min-w-0 font-medium">Select model</span>
+						<span class="min-w-0 font-medium">{m.models_select_button()}</span>
 					{/if}
 
 					{#if updating || isLoadingModel}
@@ -322,9 +323,9 @@
 				>
 					<DropdownMenuSearchable
 						bind:searchValue={searchTerm}
-						placeholder="Search models..."
+						placeholder={m.models_search_placeholder()}
 						onSearchKeyDown={handleSearchKeyDown}
-						emptyMessage="No models found."
+						emptyMessage={m.models_not_found()}
 						isEmpty={filteredOptions.length === 0 && isCurrentModelInCache}
 					>
 						<div class="models-list">
@@ -340,12 +341,14 @@
 								>
 									<ModelId modelId={currentModel} class="flex-1" showOrgName />
 
-									<span class="ml-2 text-xs whitespace-nowrap opacity-70">(not available)</span>
+									<span class="ml-2 text-xs whitespace-nowrap opacity-70"
+										>{m.models_not_available()}</span
+									>
 								</button>
 							{/if}
 
 							{#if filteredOptions.length === 0}
-								<p class="px-4 py-3 text-sm text-muted-foreground">No models found.</p>
+								<p class="px-4 py-3 text-sm text-muted-foreground">{m.models_not_found()}</p>
 							{/if}
 
 							{#snippet modelOption(item: ModelItem, showOrgName: boolean)}

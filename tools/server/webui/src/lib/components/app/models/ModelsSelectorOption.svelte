@@ -1,4 +1,10 @@
 <script lang="ts">
+	import { ActionIcon, ModelId } from '$lib/components/app';
+	import { cn } from '$lib/components/ui/utils';
+	import { ServerModelStatus } from '$lib/enums';
+	import * as m from '$lib/paraglide/messages';
+	import { modelsStore, routerModels } from '$lib/stores/models.svelte';
+	import type { ModelOption } from '$lib/types/models';
 	import {
 		CircleAlert,
 		Heart,
@@ -9,11 +15,6 @@
 		PowerOff,
 		RotateCw
 	} from '@lucide/svelte';
-	import { cn } from '$lib/components/ui/utils';
-	import { ActionIcon, ModelId } from '$lib/components/app';
-	import type { ModelOption } from '$lib/types/models';
-	import { ServerModelStatus } from '$lib/enums';
-	import { modelsStore, routerModels } from '$lib/stores/models.svelte';
 
 	interface Props {
 		option: ModelOption;
@@ -88,7 +89,7 @@
 				<ActionIcon
 					iconSize="h-2.5 w-2.5"
 					icon={HeartOff}
-					tooltip="Remove from favorites"
+					tooltip={m.model_selector_remove_from_favorites()}
 					class="h-3 w-3 hover:text-foreground"
 					onclick={() => modelsStore.toggleFavorite(option.model)}
 				/>
@@ -96,7 +97,7 @@
 				<ActionIcon
 					iconSize="h-2.5 w-2.5"
 					icon={Heart}
-					tooltip="Add to favorites"
+					tooltip={m.model_selector_add_to_favorites()}
 					class="h-3 w-3 hover:text-foreground"
 					onclick={() => modelsStore.toggleFavorite(option.model)}
 				/>
@@ -107,7 +108,7 @@
 				<ActionIcon
 					iconSize="h-2.5 w-2.5"
 					icon={Info}
-					tooltip="Model information"
+					tooltip={m.dialog_model_information_title()}
 					class="h-3 w-3 hover:text-foreground"
 					onclick={() => onInfoClick(option.model)}
 				/>
@@ -126,7 +127,7 @@
 					<ActionIcon
 						iconSize="h-2.5 w-2.5"
 						icon={RotateCw}
-						tooltip="Retry loading model"
+						tooltip={m.model_selector_retry_loading_model()}
 						class="h-3 w-3 text-red-500 hover:text-foreground"
 						onclick={() => modelsStore.loadModel(option.model)}
 					/>
@@ -140,7 +141,7 @@
 					<ActionIcon
 						iconSize="h-2.5 w-2.5"
 						icon={PowerOff}
-						tooltip="Unload model"
+						tooltip={m.model_selector_unload_model()}
 						class="h-3 w-3 text-red-500 hover:text-red-600"
 						onclick={(e) => {
 							e?.stopPropagation();
@@ -159,7 +160,7 @@
 					<ActionIcon
 						iconSize="h-2.5 w-2.5"
 						icon={PowerOff}
-						tooltip="Unload model"
+						tooltip={m.model_selector_unload_model()}
 						class="h-3 w-3 text-red-500 hover:text-red-600"
 						onclick={() => modelsStore.unloadModel(option.model)}
 					/>
@@ -175,7 +176,7 @@
 					<ActionIcon
 						iconSize="h-2.5 w-2.5"
 						icon={Power}
-						tooltip="Load model"
+						tooltip={m.model_selector_load_model()}
 						class="h-3 w-3"
 						onclick={() => modelsStore.loadModel(option.model)}
 					/>

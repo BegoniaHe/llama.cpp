@@ -246,7 +246,9 @@
 					<DropdownMenuSearchable
 						placeholder={m.mcp_servers_search_placeholder()}
 						bind:searchValue={mcpSearchQuery}
-						emptyMessage={hasMcpServers ? m.mcp_servers_no_results() : m.mcp_servers_none_configured()}
+						emptyMessage={hasMcpServers
+							? m.mcp_servers_no_results()
+							: m.mcp_servers_none_configured()}
 						isEmpty={filteredMcpServers.length === 0}
 					>
 						<div class="max-h-64 overflow-y-auto">

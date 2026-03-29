@@ -52,7 +52,9 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>{m.chat_sidebar_cancel()}</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleConfirmReset}>{m.settings_reset_to_default()}</AlertDialog.Action>
+			<AlertDialog.Action onclick={handleConfirmReset}
+				>{m.settings_reset_to_default()}</AlertDialog.Action
+			>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

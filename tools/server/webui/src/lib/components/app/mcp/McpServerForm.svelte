@@ -84,7 +84,8 @@
 
 					{#if !mcpStore.isProxyAvailable}
 						<span class="inline-flex gap-0.75 text-xs text-muted-foreground/60"
-							>({m.mcp_server_form_proxy_hint_prefix()} <pre>llama-server</pre>
+							>({m.mcp_server_form_proxy_hint_prefix()}
+							<pre>llama-server</pre>
 							{m.mcp_server_form_proxy_hint_with()}
 							<pre>--webui-mcp-proxy</pre>
 							{m.mcp_server_form_proxy_hint_suffix()})</span

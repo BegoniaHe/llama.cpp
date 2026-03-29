@@ -14,7 +14,13 @@
 </script>
 
 <div class="flex shrink-0 items-center gap-1">
-	<Button variant="ghost" size="icon" class="h-7 w-7" onclick={onEdit} aria-label={m.chat_sidebar_edit_action()}>
+	<Button
+		variant="ghost"
+		size="icon"
+		class="h-7 w-7"
+		onclick={onEdit}
+		aria-label={m.chat_sidebar_edit_action()}
+	>
 		<Pencil class="h-3.5 w-3.5" />
 	</Button>
 

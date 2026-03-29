@@ -99,9 +99,7 @@
 						// Single conversation object
 						importedData = [parsedData];
 					} else {
-						throw new Error(
-							m.settings_import_export_invalid_file_format()
-						);
+						throw new Error(m.settings_import_export_invalid_file_format());
 					}
 
 					fullImportData = importedData;
@@ -197,17 +195,23 @@
 			{#if showExportSummary && exportedConversations.length > 0}
 				<div class="mt-4 grid overflow-x-auto rounded-lg border border-border/50 bg-muted/30 p-4">
 					<h5 class="mb-2 text-sm font-medium">
-						{m.settings_import_export_exported_count({ count: String(exportedConversations.length) })}
+						{m.settings_import_export_exported_count({
+							count: String(exportedConversations.length)
+						})}
 					</h5>
 
 					<ul class="space-y-1 text-sm text-muted-foreground">
 						{#each exportedConversations.slice(0, 10) as conv (conv.id)}
-							<li class="truncate">• {conv.name || m.settings_import_export_untitled_conversation()}</li>
+							<li class="truncate">
+								• {conv.name || m.settings_import_export_untitled_conversation()}
+							</li>
 						{/each}
 
 						{#if exportedConversations.length > 10}
 							<li class="italic">
-								{m.settings_import_export_more_count({ count: String(exportedConversations.length - 10) })}
+								{m.settings_import_export_more_count({
+									count: String(exportedConversations.length - 10)
+								})}
 							</li>
 						{/if}
 					</ul>
@@ -234,17 +238,23 @@
 			{#if showImportSummary && importedConversations.length > 0}
 				<div class="mt-4 grid overflow-x-auto rounded-lg border border-border/50 bg-muted/30 p-4">
 					<h5 class="mb-2 text-sm font-medium">
-						{m.settings_import_export_imported_count({ count: String(importedConversations.length) })}
+						{m.settings_import_export_imported_count({
+							count: String(importedConversations.length)
+						})}
 					</h5>
 
 					<ul class="space-y-1 text-sm text-muted-foreground">
 						{#each importedConversations.slice(0, 10) as conv (conv.id)}
-							<li class="truncate">• {conv.name || m.settings_import_export_untitled_conversation()}</li>
+							<li class="truncate">
+								• {conv.name || m.settings_import_export_untitled_conversation()}
+							</li>
 						{/each}
 
 						{#if importedConversations.length > 10}
 							<li class="italic">
-								{m.settings_import_export_more_count({ count: String(importedConversations.length - 10) })}
+								{m.settings_import_export_more_count({
+									count: String(importedConversations.length - 10)
+								})}
 							</li>
 						{/if}
 					</ul>

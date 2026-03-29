@@ -33,7 +33,9 @@
 				<span>{m.mcp_connection_log_title({ count: String(logs.length) })}</span>
 
 				{#if connectionTimeMs !== undefined}
-					<span class="ml-1">· {m.mcp_connection_log_connected_in({ ms: String(connectionTimeMs) })}</span>
+					<span class="ml-1"
+						>· {m.mcp_connection_log_connected_in({ ms: String(connectionTimeMs) })}</span
+					>
 				{/if}
 			</Collapsible.Trigger>
 		</div>

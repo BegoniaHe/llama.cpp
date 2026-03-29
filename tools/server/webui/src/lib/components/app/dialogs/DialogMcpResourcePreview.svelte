@@ -113,7 +113,9 @@
 				<pre
 					class="max-h-[70vh] overflow-auto rounded-md border bg-muted/30 p-4 font-mono text-sm break-words whitespace-pre-wrap">{extra.content}</pre>
 			{:else}
-				<div class="py-8 text-center text-sm text-muted-foreground">{m.mcp_resource_no_content_available()}</div>
+				<div class="py-8 text-center text-sm text-muted-foreground">
+					{m.mcp_resource_no_content_available()}
+				</div>
 			{/if}
 		</div>
 	</Dialog.Content>

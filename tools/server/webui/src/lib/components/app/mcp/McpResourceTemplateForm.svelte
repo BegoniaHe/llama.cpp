@@ -165,7 +165,9 @@
 	{/if}
 
 	<div class="flex justify-end gap-2 pt-1">
-		<Button type="button" size="sm" variant="secondary" onclick={onCancel}>{m.chat_sidebar_cancel()}</Button>
+		<Button type="button" size="sm" variant="secondary" onclick={onCancel}
+			>{m.chat_sidebar_cancel()}</Button
+		>
 
 		<Button size="sm" type="submit" disabled={!isComplete}>{m.mcp_action_read_resource()}</Button>
 	</div>

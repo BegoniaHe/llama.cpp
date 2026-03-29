@@ -116,7 +116,8 @@
 				templatePreviewError = m.mcp_resource_error_failed_to_read();
 			}
 		} catch (error) {
-			templatePreviewError = error instanceof Error ? error.message : m.mcp_resource_error_unknown();
+			templatePreviewError =
+				error instanceof Error ? error.message : m.mcp_resource_error_unknown();
 		} finally {
 			templatePreviewLoading = false;
 		}
@@ -369,7 +370,9 @@
 		</div>
 
 		<Dialog.Footer class="border-t border-border/30 px-6 py-4">
-			<Button variant="outline" onclick={() => handleOpenChange(false)}>{m.chat_sidebar_cancel()}</Button>
+			<Button variant="outline" onclick={() => handleOpenChange(false)}
+				>{m.chat_sidebar_cancel()}</Button
+			>
 
 			{#if hasTemplateResult}
 				<Button onclick={handleAttachTemplateResource} disabled={isAttaching}>

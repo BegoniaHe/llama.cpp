@@ -72,20 +72,27 @@
 			[SETTINGS_KEYS.LANGUAGE]: m.settings_field_language_label(),
 			[SETTINGS_KEYS.API_KEY]: m.settings_field_api_key_label(),
 			[SETTINGS_KEYS.SYSTEM_MESSAGE]: m.settings_field_system_message_label(),
-			[SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN]: m.settings_field_paste_long_text_to_file_length_label(),
-			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]: m.settings_field_copy_text_attachments_as_plain_text_label(),
+			[SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN]:
+				m.settings_field_paste_long_text_to_file_length_label(),
+			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]:
+				m.settings_field_copy_text_attachments_as_plain_text_label(),
 			[SETTINGS_KEYS.ENABLE_CONTINUE_GENERATION]: m.settings_field_enable_continue_button_label(),
 			[SETTINGS_KEYS.PDF_AS_IMAGE]: m.settings_field_parse_pdf_as_image_label(),
-			[SETTINGS_KEYS.ASK_FOR_TITLE_CONFIRMATION]: m.settings_field_ask_for_title_confirmation_label(),
-			[SETTINGS_KEYS.SHOW_MESSAGE_STATS]: m.settings_field_show_message_generation_statistics_label(),
+			[SETTINGS_KEYS.ASK_FOR_TITLE_CONFIRMATION]:
+				m.settings_field_ask_for_title_confirmation_label(),
+			[SETTINGS_KEYS.SHOW_MESSAGE_STATS]:
+				m.settings_field_show_message_generation_statistics_label(),
 			[SETTINGS_KEYS.SHOW_THOUGHT_IN_PROGRESS]: m.settings_field_show_thought_in_progress_label(),
 			[SETTINGS_KEYS.KEEP_STATS_VISIBLE]: m.settings_field_keep_stats_visible_label(),
 			[SETTINGS_KEYS.AUTO_MIC_ON_EMPTY]: m.settings_field_show_microphone_on_empty_input_label(),
-			[SETTINGS_KEYS.RENDER_USER_CONTENT_AS_MARKDOWN]: m.settings_field_render_user_content_as_markdown_label(),
+			[SETTINGS_KEYS.RENDER_USER_CONTENT_AS_MARKDOWN]:
+				m.settings_field_render_user_content_as_markdown_label(),
 			[SETTINGS_KEYS.FULL_HEIGHT_CODE_BLOCKS]: m.settings_field_use_full_height_code_blocks_label(),
 			[SETTINGS_KEYS.DISABLE_AUTO_SCROLL]: m.settings_field_disable_automatic_scroll_label(),
-			[SETTINGS_KEYS.ALWAYS_SHOW_SIDEBAR_ON_DESKTOP]: m.settings_field_always_show_sidebar_on_desktop_label(),
-			[SETTINGS_KEYS.AUTO_SHOW_SIDEBAR_ON_NEW_CHAT]: m.settings_field_auto_show_sidebar_on_new_chat_label(),
+			[SETTINGS_KEYS.ALWAYS_SHOW_SIDEBAR_ON_DESKTOP]:
+				m.settings_field_always_show_sidebar_on_desktop_label(),
+			[SETTINGS_KEYS.AUTO_SHOW_SIDEBAR_ON_NEW_CHAT]:
+				m.settings_field_auto_show_sidebar_on_new_chat_label(),
 			[SETTINGS_KEYS.SHOW_RAW_MODEL_NAMES]: m.settings_field_show_raw_model_names_label(),
 			[SETTINGS_KEYS.TEMPERATURE]: m.settings_field_temperature_label(),
 			[SETTINGS_KEYS.DYNATEMP_RANGE]: m.settings_field_dynamic_temperature_range_label(),
@@ -109,9 +116,12 @@
 			[SETTINGS_KEYS.DRY_PENALTY_LAST_N]: m.settings_field_dry_penalty_last_n_label(),
 			[SETTINGS_KEYS.AGENTIC_MAX_TURNS]: m.settings_field_agentic_loop_max_turns_label(),
 			[SETTINGS_KEYS.ALWAYS_SHOW_AGENTIC_TURNS]: m.settings_field_always_show_agentic_turns_label(),
-			[SETTINGS_KEYS.AGENTIC_MAX_TOOL_PREVIEW_LINES]: m.settings_field_max_lines_per_tool_preview_label(),
-			[SETTINGS_KEYS.SHOW_TOOL_CALL_IN_PROGRESS]: m.settings_field_show_tool_call_in_progress_label(),
-			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]: m.settings_field_disable_reasoning_content_parsing_label(),
+			[SETTINGS_KEYS.AGENTIC_MAX_TOOL_PREVIEW_LINES]:
+				m.settings_field_max_lines_per_tool_preview_label(),
+			[SETTINGS_KEYS.SHOW_TOOL_CALL_IN_PROGRESS]:
+				m.settings_field_show_tool_call_in_progress_label(),
+			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]:
+				m.settings_field_disable_reasoning_content_parsing_label(),
 			[SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT]:
 				m.settings_field_exclude_reasoning_from_context_label(),
 			[SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH]: m.settings_field_enable_raw_output_toggle_label(),
@@ -128,7 +138,8 @@
 			[SETTINGS_KEYS.THEME]: m.settings_help_theme(),
 			[SETTINGS_KEYS.LANGUAGE]: m.settings_help_language(),
 			[SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN]: m.settings_help_paste_long_text_to_file_length(),
-			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]: m.settings_help_copy_text_attachments_as_plain_text(),
+			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]:
+				m.settings_help_copy_text_attachments_as_plain_text(),
 			[SETTINGS_KEYS.SAMPLERS]: m.settings_help_samplers(),
 			[SETTINGS_KEYS.BACKEND_SAMPLING]: m.settings_help_backend_sampling(),
 			[SETTINGS_KEYS.TEMPERATURE]: m.settings_help_temperature(),
@@ -151,7 +162,8 @@
 			[SETTINGS_KEYS.MAX_TOKENS]: m.settings_help_max_tokens(),
 			[SETTINGS_KEYS.CUSTOM]: m.settings_help_custom_json(),
 			[SETTINGS_KEYS.SHOW_THOUGHT_IN_PROGRESS]: m.settings_help_show_thought_in_progress(),
-			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]: m.settings_help_disable_reasoning_content_parsing(),
+			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]:
+				m.settings_help_disable_reasoning_content_parsing(),
 			[SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT]:
 				m.settings_help_exclude_reasoning_from_context(),
 			[SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH]: m.settings_help_enable_raw_output_toggle(),
@@ -160,9 +172,12 @@
 			[SETTINGS_KEYS.ASK_FOR_TITLE_CONFIRMATION]: m.settings_help_ask_for_title_confirmation(),
 			[SETTINGS_KEYS.PDF_AS_IMAGE]: m.settings_help_parse_pdf_as_image(),
 			[SETTINGS_KEYS.DISABLE_AUTO_SCROLL]: m.settings_help_disable_automatic_scroll(),
-			[SETTINGS_KEYS.RENDER_USER_CONTENT_AS_MARKDOWN]: m.settings_help_render_user_content_as_markdown(),
-			[SETTINGS_KEYS.ALWAYS_SHOW_SIDEBAR_ON_DESKTOP]: m.settings_help_always_show_sidebar_on_desktop(),
-			[SETTINGS_KEYS.AUTO_SHOW_SIDEBAR_ON_NEW_CHAT]: m.settings_help_auto_show_sidebar_on_new_chat(),
+			[SETTINGS_KEYS.RENDER_USER_CONTENT_AS_MARKDOWN]:
+				m.settings_help_render_user_content_as_markdown(),
+			[SETTINGS_KEYS.ALWAYS_SHOW_SIDEBAR_ON_DESKTOP]:
+				m.settings_help_always_show_sidebar_on_desktop(),
+			[SETTINGS_KEYS.AUTO_SHOW_SIDEBAR_ON_NEW_CHAT]:
+				m.settings_help_auto_show_sidebar_on_new_chat(),
 			[SETTINGS_KEYS.AUTO_MIC_ON_EMPTY]: m.settings_help_show_microphone_on_empty_input(),
 			[SETTINGS_KEYS.FULL_HEIGHT_CODE_BLOCKS]: m.settings_help_use_full_height_code_blocks(),
 			[SETTINGS_KEYS.SHOW_RAW_MODEL_NAMES]: m.settings_help_show_raw_model_names(),
@@ -205,10 +220,7 @@
 				createField(SETTINGS_KEYS.API_KEY, SettingsFieldType.INPUT),
 				createField(SETTINGS_KEYS.SYSTEM_MESSAGE, SettingsFieldType.TEXTAREA),
 				createField(SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN, SettingsFieldType.INPUT),
-				createField(
-					SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT,
-					SettingsFieldType.CHECKBOX
-				),
+				createField(SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.ENABLE_CONTINUE_GENERATION, SettingsFieldType.CHECKBOX, {
 					isExperimental: true
 				}),

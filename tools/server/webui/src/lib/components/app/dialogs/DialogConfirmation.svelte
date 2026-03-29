@@ -1,7 +1,8 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import type { Component, Snippet } from 'svelte';
 	import { KeyboardKey } from '$lib/enums';
+	import * as m from '$lib/paraglide/messages';
+	import type { Component, Snippet } from 'svelte';
 
 	interface Props {
 		open: boolean;
@@ -21,8 +22,8 @@
 		open = $bindable(),
 		title,
 		description,
-		confirmText = 'Confirm',
-		cancelText = 'Cancel',
+		confirmText = m.dialog_confirmation_confirm(),
+		cancelText = m.chat_sidebar_cancel(),
 		variant = 'default',
 		icon,
 		onConfirm,

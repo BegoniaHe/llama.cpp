@@ -1,13 +1,13 @@
 import { browser } from '$app/environment';
 import { m } from '$lib/paraglide/messages';
 import {
-    baseLocale,
-    getLocale,
-    getTextDirection,
-    localStorageKey,
-    locales,
-    setLocale,
-    type Locale
+	baseLocale,
+	getLocale,
+	getTextDirection,
+	localStorageKey,
+	locales,
+	setLocale,
+	type Locale
 } from '$lib/paraglide/runtime';
 
 let initialized = false;
@@ -26,9 +26,7 @@ function getLocaleDisplayName(locale: Locale): string {
 	}
 
 	try {
-		return (
-			new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale.toUpperCase()
-		);
+		return new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale.toUpperCase();
 	} catch {
 		return locale.toUpperCase();
 	}
