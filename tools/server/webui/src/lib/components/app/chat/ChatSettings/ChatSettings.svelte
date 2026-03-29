@@ -112,6 +112,8 @@
 			[SETTINGS_KEYS.AGENTIC_MAX_TOOL_PREVIEW_LINES]: m.settings_field_max_lines_per_tool_preview_label(),
 			[SETTINGS_KEYS.SHOW_TOOL_CALL_IN_PROGRESS]: m.settings_field_show_tool_call_in_progress_label(),
 			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]: m.settings_field_disable_reasoning_content_parsing_label(),
+			[SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT]:
+				m.settings_field_exclude_reasoning_from_context_label(),
 			[SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH]: m.settings_field_enable_raw_output_toggle_label(),
 			[SETTINGS_KEYS.CUSTOM]: m.settings_field_custom_json_label()
 		};
@@ -150,6 +152,8 @@
 			[SETTINGS_KEYS.CUSTOM]: m.settings_help_custom_json(),
 			[SETTINGS_KEYS.SHOW_THOUGHT_IN_PROGRESS]: m.settings_help_show_thought_in_progress(),
 			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]: m.settings_help_disable_reasoning_content_parsing(),
+			[SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT]:
+				m.settings_help_exclude_reasoning_from_context(),
 			[SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH]: m.settings_help_enable_raw_output_toggle(),
 			[SETTINGS_KEYS.KEEP_STATS_VISIBLE]: m.settings_help_keep_stats_visible(),
 			[SETTINGS_KEYS.SHOW_MESSAGE_STATS]: m.settings_help_show_message_generation_statistics(),
@@ -282,6 +286,7 @@
 			icon: Code,
 			fields: [
 				createField(SETTINGS_KEYS.DISABLE_REASONING_PARSING, SettingsFieldType.CHECKBOX),
+				createField(SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.CUSTOM, SettingsFieldType.TEXTAREA)
 			]

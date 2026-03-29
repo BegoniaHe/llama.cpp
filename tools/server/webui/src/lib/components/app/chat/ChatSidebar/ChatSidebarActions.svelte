@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { KeyboardShortcutInfo } from '$lib/components/app';
+	import { KeyboardShortcutInfo, McpLogo } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { SETTINGS_SECTION_TITLES } from '$lib/constants';
+	import { getChatSettingsDialogContext } from '$lib/contexts';
 	import { m } from '$lib/paraglide/messages';
 	import { Search, SquarePen, X } from '@lucide/svelte';
 
@@ -19,6 +21,8 @@
 
 	let searchInput: HTMLInputElement | null = $state(null);
 
+	const chatSettingsDialog = getChatSettingsDialogContext();
+
 	function handleSearchModeDeactivate() {
 		isSearchModeActive = false;
 		searchQuery = '';
@@ -31,7 +35,7 @@
 	});
 </script>
 
-<div class="space-y-0.5">
+<div class="my-1 space-y-1">
 	{#if isSearchModeActive}
 		<div class="relative">
 			<Search class="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
@@ -51,7 +55,7 @@
 		</div>
 	{:else}
 		<Button
-			class="w-full justify-between hover:[&>kbd]:opacity-100"
+			class="w-full justify-between backdrop-blur-none! hover:[&>kbd]:opacity-100"
 			href="?new_chat=true#/"
 			onclick={handleMobileSidebarItemClick}
 			variant="ghost"
@@ -65,7 +69,7 @@
 		</Button>
 
 		<Button
-			class="w-full justify-between hover:[&>kbd]:opacity-100"
+			class="w-full justify-between backdrop-blur-none! hover:[&>kbd]:opacity-100"
 			onclick={() => {
 				isSearchModeActive = true;
 			}}
@@ -77,6 +81,20 @@
 			</div>
 
 			<KeyboardShortcutInfo keys={['cmd', 'k']} />
+		</Button>
+
+		<Button
+			class="w-full justify-between backdrop-blur-none! hover:[&>kbd]:opacity-100"
+			onclick={() => {
+				chatSettingsDialog.open(SETTINGS_SECTION_TITLES.MCP);
+			}}
+			variant="ghost"
+		>
+			<div class="flex items-center gap-2">
+				<McpLogo class="h-4 w-4" />
+
+				{m.chat_sidebar_mcp_servers()}
+			</div>
 		</Button>
 	{/if}
 </div>

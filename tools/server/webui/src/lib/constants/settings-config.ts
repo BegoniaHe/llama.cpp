@@ -11,6 +11,7 @@ export const SETTING_CONFIG_DEFAULT: Record<string, string | number | boolean | 
 	language: 'system',
 	showThoughtInProgress: false,
 	disableReasoningParsing: false,
+	excludeReasoningFromContext: false,
 	showRawOutputSwitch: false,
 	keepStatsVisible: false,
 	showMessageStats: true,
@@ -109,6 +110,8 @@ export const SETTING_CONFIG_INFO: Record<string, string> = {
 	showThoughtInProgress: 'Expand thought process by default when generating messages.',
 	disableReasoningParsing:
 		'Send reasoning_format=none to prevent server-side extraction of reasoning tokens into separate field',
+	excludeReasoningFromContext:
+		'Strip reasoning content from previous messages before sending to the model. When unchecked, reasoning is sent back via the reasoning_content field so the model can see its own chain-of-thought across turns.',
 	showRawOutputSwitch:
 		'Show toggle button to display messages as plain text instead of Markdown-formatted content',
 	keepStatsVisible: 'Keep processing statistics visible after generation finishes.',

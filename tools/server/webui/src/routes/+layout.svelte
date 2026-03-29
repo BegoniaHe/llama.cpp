@@ -3,10 +3,16 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import { ChatSidebar, DialogConversationTitleUpdate } from '$lib/components/app';
+	import {
+		ChatSidebar,
+		DialogChatSettings,
+		DialogConversationTitleUpdate
+	} from '$lib/components/app';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import type { SettingsSectionTitle } from '$lib/constants';
 	import { TOOLTIP_DELAY_DURATION } from '$lib/constants';
+	import { setChatSettingsDialogContext } from '$lib/contexts';
 	import { KeyboardKey } from '$lib/enums';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 	import { applyLocalePreference, initializeI18n } from '$lib/i18n/runtime';
@@ -42,6 +48,16 @@
 	let titleUpdateCurrentTitle = $state('');
 	let titleUpdateNewTitle = $state('');
 	let titleUpdateResolve: ((value: boolean) => void) | null = null;
+
+	let chatSettingsDialogOpen = $state(false);
+	let chatSettingsDialogInitialSection = $state<SettingsSectionTitle | undefined>(undefined);
+
+	setChatSettingsDialogContext({
+		open: (initialSection?: SettingsSectionTitle) => {
+			chatSettingsDialogInitialSection = initialSection;
+			chatSettingsDialogOpen = true;
+		}
+	});
 
 	// Global keyboard shortcuts
 	function handleKeydown(event: KeyboardEvent) {
@@ -220,6 +236,12 @@
 	<ModeWatcher />
 
 	<Toaster richColors />
+
+	<DialogChatSettings
+		open={chatSettingsDialogOpen}
+		onOpenChange={(open) => (chatSettingsDialogOpen = open)}
+		initialSection={chatSettingsDialogInitialSection}
+	/>
 
 	<DialogConversationTitleUpdate
 		bind:open={titleUpdateDialogOpen}
