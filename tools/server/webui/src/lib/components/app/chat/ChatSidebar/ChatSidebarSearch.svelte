@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { SearchInput } from '$lib/components/app';
+	import { m } from '$lib/paraglide/messages';
 
 	interface Props {
 		value?: string;
@@ -10,7 +11,7 @@
 
 	let {
 		value = $bindable(''),
-		placeholder = 'Search conversations...',
+		placeholder = m.chat_sidebar_search_input(),
 		onInput,
 		class: className
 	}: Props = $props();

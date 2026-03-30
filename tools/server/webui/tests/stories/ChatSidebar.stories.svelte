@@ -1,8 +1,8 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import ChatSidebar from '$lib/components/app/chat/ChatSidebar/ChatSidebar.svelte';
-	import { waitFor } from 'storybook/test';
-	import { screen } from 'storybook/test';
+	import { m } from '$lib/paraglide/messages';
+	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { screen, waitFor } from 'storybook/test';
 
 	const { Story } = defineMeta({
 		title: 'Components/ChatSidebar',
@@ -73,7 +73,7 @@
 			conversationsStore.conversations = mockConversations;
 		}, 0));
 		
-		const searchTrigger = screen.getByText('Search');
+		const searchTrigger = screen.getByText(m.chat_sidebar_search_conversations());
 		userEvent.click(searchTrigger);
 	}}
 >

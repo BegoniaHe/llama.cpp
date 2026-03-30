@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { ArrowUp } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { cn } from '$lib/components/ui/utils';
+	import { m } from '$lib/paraglide/messages';
+	import { ArrowUp } from '@lucide/svelte';
 
 	interface Props {
 		canSend?: boolean;
@@ -35,7 +36,7 @@
 		)}
 		{...props}
 	>
-		<span class="sr-only">Send</span>
+		<span class="sr-only">{m.chat_form_submit()}</span>
 		<ArrowUp class="h-12 w-12" />
 	</Button>
 {/snippet}

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { Square } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
 	import {
 		ChatFormActionAttachmentsDropdown,
 		ChatFormActionAttachmentsSheet,
@@ -10,17 +8,20 @@
 		ModelsSelector,
 		ModelsSelectorSheet
 	} from '$lib/components/app';
+	import { Button } from '$lib/components/ui/button';
 	import { SETTINGS_SECTION_TITLES } from '$lib/constants';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
 	import { getChatSettingsDialogContext } from '$lib/contexts';
 	import { FileTypeCategory } from '$lib/enums';
-	import { getFileTypeCategory } from '$lib/utils';
-	import { config } from '$lib/stores/settings.svelte';
-	import { modelsStore, modelOptions, selectedModelId } from '$lib/stores/models.svelte';
-	import { isRouterMode, serverError } from '$lib/stores/server.svelte';
+	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { activeMessages, conversationsStore } from '$lib/stores/conversations.svelte';
-	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
+	import { modelOptions, modelsStore, selectedModelId } from '$lib/stores/models.svelte';
+	import { isRouterMode, serverError } from '$lib/stores/server.svelte';
+	import { config } from '$lib/stores/settings.svelte';
+	import { getFileTypeCategory } from '$lib/utils';
+	import { Square } from '@lucide/svelte';
 
 	interface Props {
 		canSend?: boolean;
@@ -151,11 +152,11 @@
 
 	let submitTooltip = $derived.by(() => {
 		if (!hasModelSelected) {
-			return 'Please select a model first';
+			return m.chat_form_submit_select_model_first();
 		}
 
 		if (!isSelectedModelInCache) {
-			return 'Selected model is not available, please select another';
+			return m.chat_form_submit_model_unavailable();
 		}
 
 		return '';
@@ -247,7 +248,7 @@
 			onclick={onStop}
 			class="group h-8 w-8 rounded-full p-0 hover:bg-destructive/10!"
 		>
-			<span class="sr-only">Stop</span>
+			<span class="sr-only">{m.chat_sidebar_stop_generation()}</span>
 
 			<Square
 				class="h-8 w-8 fill-muted-foreground stroke-muted-foreground group-hover:fill-destructive group-hover:stroke-destructive hover:fill-destructive hover:stroke-destructive"

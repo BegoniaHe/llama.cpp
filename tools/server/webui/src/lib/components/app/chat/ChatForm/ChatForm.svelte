@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
-		ChatAttachmentsList,
 		ChatAttachmentMcpResources,
+		ChatAttachmentsList,
 		ChatFormActions,
 		ChatFormFileInputInvisible,
 		ChatFormPromptPicker,
@@ -11,12 +11,12 @@
 	import { DialogMcpResources } from '$lib/components/app/dialogs';
 	import {
 		CLIPBOARD_CONTENT_QUOTE_PREFIX,
-		INPUT_CLASSES,
-		SETTING_CONFIG_DEFAULT,
 		INITIAL_FILE_SIZE,
+		INPUT_CLASSES,
 		PROMPT_CONTENT_SEPARATOR,
 		PROMPT_TRIGGER_PREFIX,
-		RESOURCE_TRIGGER_PREFIX
+		RESOURCE_TRIGGER_PREFIX,
+		SETTING_CONFIG_DEFAULT
 	} from '$lib/constants';
 	import {
 		ContentPartType,
@@ -25,13 +25,14 @@
 		MimeTypeText,
 		SpecialFileType
 	} from '$lib/enums';
-	import { config } from '$lib/stores/settings.svelte';
+	import { m } from '$lib/paraglide/messages';
+	import { chatStore } from '$lib/stores/chat.svelte';
+	import { activeMessages, conversationsStore } from '$lib/stores/conversations.svelte';
+	import { mcpHasResourceAttachments } from '$lib/stores/mcp-resources.svelte';
+	import { mcpStore } from '$lib/stores/mcp.svelte';
 	import { modelOptions, selectedModelId } from '$lib/stores/models.svelte';
 	import { isRouterMode } from '$lib/stores/server.svelte';
-	import { chatStore } from '$lib/stores/chat.svelte';
-	import { mcpStore } from '$lib/stores/mcp.svelte';
-	import { mcpHasResourceAttachments } from '$lib/stores/mcp-resources.svelte';
-	import { conversationsStore, activeMessages } from '$lib/stores/conversations.svelte';
+	import { config } from '$lib/stores/settings.svelte';
 	import type { GetPromptResult, MCPPromptInfo, MCPResourceInfo, PromptMessage } from '$lib/types';
 	import { isIMEComposing, parseClipboardContent, uuid } from '$lib/utils';
 	import {
@@ -71,7 +72,7 @@
 		class: className = '',
 		disabled = false,
 		isLoading = false,
-		placeholder = 'Type a message...',
+		placeholder = m.chat_form_placeholder(),
 		showMcpPromptButton = false,
 		uploadedFiles = $bindable([]),
 		value = $bindable(''),

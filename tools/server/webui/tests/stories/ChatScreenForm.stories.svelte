@@ -1,10 +1,11 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import ChatScreenForm from '$lib/components/app/chat/ChatScreen/ChatScreenForm.svelte';
+	import { m } from '$lib/paraglide/messages';
+	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { expect } from 'storybook/test';
 	import jpgAsset from './fixtures/assets/1.jpg?url';
-	import svgAsset from './fixtures/assets/hf-logo.svg?url';
 	import pdfAsset from './fixtures/assets/example.pdf?raw';
+	import svgAsset from './fixtures/assets/hf-logo.svg?url';
 
 	const { Story } = defineMeta({
 		title: 'Components/ChatScreen/ChatScreenForm',
@@ -46,7 +47,7 @@
 	args={{ class: 'max-w-[56rem] w-[calc(100vw-2rem)]' }}
 	play={async ({ canvas, userEvent }) => {
 		const textarea = await canvas.findByRole('textbox');
-		const submitButton = await canvas.findByRole('button', { name: 'Send' });
+		const submitButton = await canvas.findByRole('button', { name: m.chat_form_submit() });
 
 		// Expect the input to be focused after the component is mounted
 		await expect(textarea).toHaveFocus();

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Mic, Square } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { m } from '$lib/paraglide/messages';
+	import { Mic, Square } from '@lucide/svelte';
 
 	interface Props {
 		class?: string;
@@ -33,7 +34,9 @@
 				onclick={onMicClick}
 				type="button"
 			>
-				<span class="sr-only">{isRecording ? 'Stop recording' : 'Start recording'}</span>
+				<span class="sr-only"
+					>{isRecording ? m.chat_form_record_stop() : m.chat_form_record_start()}</span
+				>
 
 				{#if isRecording}
 					<Square class="h-4 w-4 animate-pulse fill-white" />
@@ -45,7 +48,7 @@
 
 		{#if !hasAudioModality}
 			<Tooltip.Content>
-				<p>Current model does not support audio</p>
+				<p>{m.chat_form_record_audio_unsupported()}</p>
 			</Tooltip.Content>
 		{/if}
 	</Tooltip.Root>
