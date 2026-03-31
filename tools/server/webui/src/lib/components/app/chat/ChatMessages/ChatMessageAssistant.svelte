@@ -9,7 +9,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import Label from '$lib/components/ui/label/label.svelte';
-	import { AGENTIC_TAGS, INPUT_CLASSES, REASONING_TAGS } from '$lib/constants';
+	import { INPUT_CLASSES } from '$lib/constants';
 	import { getMessageEditContext } from '$lib/contexts';
 	import { ChatMessageStatsView, KeyboardKey, MessageRole, ServerModelStatus } from '$lib/enums';
 	import { useProcessingState } from '$lib/hooks/use-processing-state.svelte';
@@ -23,6 +23,8 @@
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
 
+	import { hasAgenticContent } from '$lib/utils';
+
 	interface Props {
 		class?: string;
 		deletionInfo: {
@@ -33,6 +35,7 @@
 		} | null;
 		isLastAssistantMessage?: boolean;
 		message: DatabaseMessage;
+		toolMessages?: DatabaseMessage[];
 		messageContent: string | undefined;
 		onCopy: () => void;
 		onConfirmDelete: () => void;
@@ -53,6 +56,7 @@
 		deletionInfo,
 		isLastAssistantMessage = false,
 		message,
+		toolMessages = [],
 		messageContent,
 		onConfirmDelete,
 		onContinue,
@@ -84,10 +88,8 @@
 		}
 	}
 
-	const hasAgenticMarkers = $derived(
-		messageContent?.includes(AGENTIC_TAGS.TOOL_CALL_START) ?? false
-	);
-	const hasReasoningMarkers = $derived(messageContent?.includes(REASONING_TAGS.START) ?? false);
+	const isAgentic = $derived(hasAgenticContent(message, toolMessages));
+	const hasReasoning = $derived(!!message.reasoningContent);
 	const processingState = useProcessingState();
 
 	let currentConfig = $derived(config());
@@ -145,7 +147,7 @@
 	}
 
 	let highlightAgenticTurns = $derived(
-		hasAgenticMarkers &&
+		isAgentic &&
 			(currentConfig.alwaysShowAgenticTurns || activeStatsView === ChatMessageStatsView.SUMMARY)
 	);
 
@@ -160,13 +162,14 @@
 		message?.role === MessageRole.ASSISTANT &&
 			isActivelyProcessing &&
 			hasNoContent &&
+			!isAgentic &&
 			isLastAssistantMessage
 	);
 
 	let showProcessingInfoBottom = $derived(
 		message?.role === MessageRole.ASSISTANT &&
 			isActivelyProcessing &&
-			!hasNoContent &&
+			(!hasNoContent || isAgentic) &&
 			isLastAssistantMessage
 	);
 
@@ -252,10 +255,10 @@
 			<pre class="raw-output">{messageContent || ''}</pre>
 		{:else}
 			<ChatMessageAgenticContent
-				content={messageContent || ''}
+				{message}
+				{toolMessages}
 				isStreaming={isChatStreaming()}
 				highlightTurns={highlightAgenticTurns}
-				{message}
 			/>
 		{/if}
 	{:else}
@@ -344,9 +347,7 @@
 			{onCopy}
 			{onEdit}
 			{onRegenerate}
-			onContinue={currentConfig.enableContinueGeneration && !hasReasoningMarkers
-				? onContinue
-				: undefined}
+			onContinue={currentConfig.enableContinueGeneration && !hasReasoning ? onContinue : undefined}
 			{onForkConversation}
 			{onDelete}
 			{onConfirmDelete}

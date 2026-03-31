@@ -19,6 +19,7 @@
 	interface Props {
 		class?: string;
 		message: DatabaseMessage;
+		toolMessages?: DatabaseMessage[];
 		isLastAssistantMessage?: boolean;
 		siblingInfo?: ChatMessageSiblingInfo | null;
 	}
@@ -26,6 +27,7 @@
 	let {
 		class: className = '',
 		message,
+		toolMessages = [],
 		isLastAssistantMessage = false,
 		siblingInfo = null
 	}: Props = $props();
@@ -302,6 +304,7 @@
 		{deletionInfo}
 		{isLastAssistantMessage}
 		{message}
+		{toolMessages}
 		messageContent={message.content}
 		onConfirmDelete={handleConfirmDelete}
 		onContinue={handleContinue}
