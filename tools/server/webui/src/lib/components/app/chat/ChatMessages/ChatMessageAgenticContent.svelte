@@ -5,19 +5,19 @@
 		MarkdownContent,
 		SyntaxHighlightedCode
 	} from '$lib/components/app';
+	import { AgenticSectionType, ChatMessageStatsView, FileTypeText } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { config } from '$lib/stores/settings.svelte';
-	import { Wrench, Loader2, Brain } from '@lucide/svelte';
-	import { AgenticSectionType, FileTypeText } from '$lib/enums';
-	import { formatJsonPretty } from '$lib/utils';
+	import type { ChatMessageAgenticTimings, ChatMessageAgenticTurnStats } from '$lib/types/chat';
+	import type { DatabaseMessage } from '$lib/types/database';
 	import {
 		deriveAgenticSections,
+		formatJsonPretty,
 		parseToolResultWithImages,
 		type AgenticSection,
 		type ToolResultLine
 	} from '$lib/utils';
-	import type { DatabaseMessage } from '$lib/types/database';
-	import type { ChatMessageAgenticTimings, ChatMessageAgenticTurnStats } from '$lib/types/chat';
-	import { ChatMessageStatsView } from '$lib/enums';
+	import { Brain, Loader2, Wrench } from '@lucide/svelte';
 
 	interface Props {
 		message: DatabaseMessage;
@@ -132,14 +132,14 @@
 			class="my-2"
 			icon={streamingIcon}
 			iconClass={streamingIconClass}
-			title={section.toolName || 'Tool call'}
-			subtitle={isStreaming ? '' : 'incomplete'}
+			title={section.toolName || m.chat_message_agentic_tool_call()}
+			subtitle={isStreaming ? '' : m.chat_message_agentic_incomplete()}
 			{isStreaming}
 			onToggle={() => toggleExpanded(index, section)}
 		>
 			<div class="pt-3">
 				<div class="my-3 flex items-center gap-2 text-xs text-muted-foreground">
-					<span>Arguments:</span>
+					<span>{m.chat_message_agentic_arguments()}</span>
 
 					{#if isStreaming}
 						<Loader2 class="h-3 w-3 animate-spin" />
@@ -154,13 +154,13 @@
 					/>
 				{:else if isStreaming}
 					<div class="rounded bg-muted/30 p-2 text-xs text-muted-foreground italic">
-						Receiving arguments...
+						{m.chat_message_agentic_receiving_arguments()}
 					</div>
 				{:else}
 					<div
 						class="rounded bg-yellow-500/10 p-2 text-xs text-yellow-600 italic dark:text-yellow-400"
 					>
-						Response was truncated
+						{m.chat_message_agentic_response_truncated()}
 					</div>
 				{/if}
 			</div>
@@ -176,13 +176,13 @@
 			icon={toolIcon}
 			iconClass={toolIconClass}
 			title={section.toolName || ''}
-			subtitle={isPending ? 'executing...' : undefined}
+			subtitle={isPending ? m.chat_message_agentic_executing() : undefined}
 			isStreaming={isPending}
 			onToggle={() => toggleExpanded(index, section)}
 		>
 			{#if section.toolArgs && section.toolArgs !== '{}'}
 				<div class="pt-3">
-					<div class="my-3 text-xs text-muted-foreground">Arguments:</div>
+					<div class="my-3 text-xs text-muted-foreground">{m.chat_message_agentic_arguments()}</div>
 
 					<SyntaxHighlightedCode
 						code={formatJsonPretty(section.toolArgs)}
@@ -195,7 +195,7 @@
 
 			<div class="pt-3">
 				<div class="my-3 flex items-center gap-2 text-xs text-muted-foreground">
-					<span>Result:</span>
+					<span>{m.chat_message_agentic_result()}</span>
 
 					{#if isPending}
 						<Loader2 class="h-3 w-3 animate-spin" />
@@ -217,7 +217,7 @@
 					</div>
 				{:else if isPending}
 					<div class="rounded bg-muted/30 p-2 text-xs text-muted-foreground italic">
-						Waiting for result...
+						{m.chat_message_agentic_waiting_result()}
 					</div>
 				{/if}
 			</div>
@@ -227,7 +227,7 @@
 			open={isExpanded(index, section)}
 			class="my-2"
 			icon={Brain}
-			title="Reasoning"
+			title={m.chat_message_agentic_reasoning()}
 			onToggle={() => toggleExpanded(index, section)}
 		>
 			<div class="pt-3">
@@ -237,8 +237,10 @@
 			</div>
 		</CollapsibleContentBlock>
 	{:else if section.type === AgenticSectionType.REASONING_PENDING}
-		{@const reasoningTitle = isStreaming ? 'Reasoning...' : 'Reasoning'}
-		{@const reasoningSubtitle = isStreaming ? '' : 'incomplete'}
+		{@const reasoningTitle = isStreaming
+			? m.chat_message_agentic_reasoning_in_progress()
+			: m.chat_message_agentic_reasoning()}
+		{@const reasoningSubtitle = isStreaming ? '' : m.chat_message_agentic_incomplete()}
 
 		<CollapsibleContentBlock
 			open={isExpanded(index, section)}
@@ -263,7 +265,9 @@
 		{#each turnGroups as turn, turnIndex (turnIndex)}
 			{@const turnStats = message?.timings?.agentic?.perTurn?.[turnIndex]}
 			<div class="agentic-turn my-2 hover:bg-muted/80 dark:hover:bg-muted/30">
-				<span class="agentic-turn-label">Turn {turnIndex + 1}</span>
+				<span class="agentic-turn-label"
+					>{m.chat_message_agentic_turn_label({ count: String(turnIndex + 1) })}</span
+				>
 				{#each turn.sections as section, sIdx (turn.flatIndices[sIdx])}
 					{@render renderSection(section, turn.flatIndices[sIdx])}
 				{/each}

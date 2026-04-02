@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { X, AlertTriangle } from '@lucide/svelte';
+	import { ChatForm, DialogConfirmation } from '$lib/components/app';
 	import { Button } from '$lib/components/ui/button';
 	import { Switch } from '$lib/components/ui/switch';
-	import { ChatForm, DialogConfirmation } from '$lib/components/app';
 	import { getMessageEditContext } from '$lib/contexts';
 	import { KeyboardKey } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { processFilesToChatUploaded } from '$lib/utils/browser-only';
+	import { AlertTriangle, X } from '@lucide/svelte';
 
 	const editCtx = getMessageEditContext();
 
@@ -98,7 +99,7 @@
 		value={editCtx.editedContent}
 		attachments={editCtx.editedExtras}
 		uploadedFiles={editCtx.editedUploadedFiles}
-		placeholder="Edit your message..."
+		placeholder={m.chat_message_edit_placeholder()}
 		showMcpPromptButton
 		onValueChange={editCtx.setContent}
 		onAttachmentRemove={handleAttachmentRemove}
@@ -115,7 +116,7 @@
 			<Switch id="save-only-switch" bind:checked={saveWithoutRegenerate} class="scale-75" />
 
 			<label for="save-only-switch" class="cursor-pointer text-xs text-muted-foreground">
-				Update without re-sending
+				{m.chat_message_edit_save_only()}
 			</label>
 		</div>
 	{:else}
@@ -125,16 +126,16 @@
 	<Button class="h-7 px-3 text-xs" onclick={attemptCancel} size="sm" variant="ghost">
 		<X class="mr-1 h-3 w-3" />
 
-		Cancel
+		{m.chat_message_edit_cancel()}
 	</Button>
 </div>
 
 <DialogConfirmation
 	bind:open={showDiscardDialog}
-	title="Discard changes?"
-	description="You have unsaved changes. Are you sure you want to discard them?"
-	confirmText="Discard"
-	cancelText="Keep editing"
+	title={m.chat_message_edit_discard_title()}
+	description={m.chat_message_edit_discard_description()}
+	confirmText={m.chat_message_edit_discard_confirm()}
+	cancelText={m.chat_message_edit_discard_cancel()}
 	variant="destructive"
 	icon={AlertTriangle}
 	onConfirm={editCtx.cancel}

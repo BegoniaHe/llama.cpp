@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as Alert from '$lib/components/ui/alert';
 	import { SyntaxHighlightedCode } from '$lib/components/app';
-	import { FileText, Image, Music, FileIcon, Eye, Info } from '@lucide/svelte';
+	import * as Alert from '$lib/components/ui/alert';
+	import { Button } from '$lib/components/ui/button';
+	import { m } from '$lib/paraglide/messages';
+	import { modelsStore } from '$lib/stores/models.svelte';
 	import {
-		isTextFile,
+		createBase64DataUrl,
+		getLanguageFromFilename,
+		isAudioFile,
 		isImageFile,
 		isPdfFile,
-		isAudioFile,
-		getLanguageFromFilename,
-		createBase64DataUrl
+		isTextFile
 	} from '$lib/utils';
 	import { convertPDFToImage } from '$lib/utils/browser-only';
-	import { modelsStore } from '$lib/stores/models.svelte';
+	import { Eye, FileIcon, FileText, Image, Info, Music } from '@lucide/svelte';
 
 	interface Props {
 		// Either an uploaded file or a stored attachment
@@ -32,7 +33,12 @@
 		activeModelId ? modelsStore.modelSupportsVision(activeModelId) : false
 	);
 
-	let displayName = $derived(uploadedFile?.name || attachment?.name || name || 'Unknown File');
+	let displayName = $derived(
+		uploadedFile?.name ||
+			attachment?.name ||
+			name ||
+			m.dialog_chat_attachment_preview_unknown_file()
+	);
 
 	// Determine file type from uploaded file or attachment
 	let isAudio = $derived(isAudioFile(attachment, uploadedFile));
@@ -110,7 +116,8 @@
 				throw new Error('No PDF file available for conversion');
 			}
 		} catch (error) {
-			pdfImagesError = error instanceof Error ? error.message : 'Failed to load PDF images';
+			pdfImagesError =
+				error instanceof Error ? error.message : m.dialog_chat_attachment_preview_pdf_load_failed();
 		} finally {
 			pdfImagesLoading = false;
 		}
@@ -142,7 +149,7 @@
 				>
 					<FileText class="mr-1 h-4 w-4" />
 
-					Text
+					{m.dialog_chat_attachment_preview_text_tab()}
 				</Button>
 
 				<Button
@@ -162,7 +169,7 @@
 						<Eye class="mr-1 h-4 w-4" />
 					{/if}
 
-					Pages
+					{m.dialog_chat_attachment_preview_pages_tab()}
 				</Button>
 			</div>
 		{/if}
@@ -181,16 +188,16 @@
 			{#if !hasVisionModality && activeModelId}
 				<Alert.Root class="mb-4">
 					<Info class="h-4 w-4" />
-					<Alert.Title>Preview only</Alert.Title>
+					<Alert.Title>{m.dialog_chat_attachment_preview_only_title()}</Alert.Title>
 					<Alert.Description>
 						<span class="inline-flex">
-							The selected model does not support vision. Only the extracted
+							{m.dialog_chat_attachment_preview_only_description_prefix()}
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<span class="mx-1 cursor-pointer underline" onclick={() => (pdfViewMode = 'text')}>
-								text
+								{m.dialog_chat_attachment_preview_only_link()}
 							</span>
-							will be sent to the model.
+							{m.dialog_chat_attachment_preview_only_description_suffix()}
 						</span>
 					</Alert.Description>
 				</Alert.Root>
@@ -203,7 +210,7 @@
 							class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
 						></div>
 
-						<p class="text-muted-foreground">Converting PDF to images...</p>
+						<p class="text-muted-foreground">{m.dialog_chat_attachment_preview_pdf_converting()}</p>
 					</div>
 				</div>
 			{:else if pdfImagesError}
@@ -211,22 +218,28 @@
 					<div class="text-center">
 						<FileText class="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
 
-						<p class="mb-4 text-muted-foreground">Failed to load PDF images</p>
+						<p class="mb-4 text-muted-foreground">
+							{m.dialog_chat_attachment_preview_pdf_load_failed()}
+						</p>
 
 						<p class="text-sm text-muted-foreground">{pdfImagesError}</p>
 
-						<Button class="mt-4" onclick={() => (pdfViewMode = 'text')}>View as Text</Button>
+						<Button class="mt-4" onclick={() => (pdfViewMode = 'text')}
+							>{m.dialog_chat_attachment_view_as_text()}</Button
+						>
 					</div>
 				</div>
 			{:else if pdfImages.length > 0}
 				<div class="max-h-[70vh] space-y-4 overflow-auto">
 					{#each pdfImages as image, index (image)}
 						<div class="text-center">
-							<p class="mb-2 text-sm text-muted-foreground">Page {index + 1}</p>
+							<p class="mb-2 text-sm text-muted-foreground">
+								{m.dialog_chat_attachment_preview_pdf_page({ page: String(index + 1) })}
+							</p>
 
 							<img
 								src={image}
-								alt="PDF Page {index + 1}"
+								alt={m.dialog_chat_attachment_preview_pdf_page_alt({ page: String(index + 1) })}
 								class="mx-auto max-w-full rounded-lg shadow-lg"
 							/>
 						</div>
@@ -237,7 +250,9 @@
 					<div class="text-center">
 						<FileText class="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
 
-						<p class="mb-4 text-muted-foreground">No PDF pages available</p>
+						<p class="mb-4 text-muted-foreground">
+							{m.dialog_chat_attachment_preview_pdf_no_pages()}
+						</p>
 					</div>
 				</div>
 			{/if}
@@ -250,7 +265,7 @@
 
 					{#if uploadedFile?.preview}
 						<audio controls class="mb-4 w-full" src={uploadedFile.preview}>
-							Your browser does not support the audio element.
+							{m.dialog_chat_attachment_audio_fallback()}
 						</audio>
 					{:else if isAudio && attachment && 'mimeType' in attachment && 'base64Data' in attachment}
 						<audio
@@ -258,10 +273,12 @@
 							class="mb-4 w-full"
 							src={createBase64DataUrl(attachment.mimeType, attachment.base64Data)}
 						>
-							Your browser does not support the audio element.
+							{m.dialog_chat_attachment_audio_fallback()}
 						</audio>
 					{:else}
-						<p class="mb-4 text-muted-foreground">Audio preview not available</p>
+						<p class="mb-4 text-muted-foreground">
+							{m.dialog_chat_attachment_audio_preview_unavailable()}
+						</p>
 					{/if}
 
 					<p class="text-sm text-muted-foreground">
@@ -276,7 +293,7 @@
 						<IconComponent class="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
 					{/if}
 
-					<p class="mb-4 text-muted-foreground">Preview not available for this file type</p>
+					<p class="mb-4 text-muted-foreground">{m.dialog_chat_attachment_preview_unavailable()}</p>
 				</div>
 			</div>
 		{/if}

@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
+	import { m } from '$lib/paraglide/messages';
 	import type { MCPPromptInfo } from '$lib/types';
 	import ChatFormPromptPickerArgumentInput from './ChatFormPromptPickerArgumentInput.svelte';
-	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		prompt: MCPPromptInfo;
@@ -67,8 +68,10 @@
 	{/if}
 
 	<div class="mt-8 flex justify-end gap-2">
-		<Button type="button" size="sm" onclick={onCancel} variant="secondary">Cancel</Button>
+		<Button type="button" size="sm" onclick={onCancel} variant="secondary"
+			>{m.chat_form_prompt_picker_cancel()}</Button
+		>
 
-		<Button size="sm" type="submit">Use Prompt</Button>
+		<Button size="sm" type="submit">{m.chat_form_prompt_picker_use_prompt()}</Button>
 	</div>
 </form>

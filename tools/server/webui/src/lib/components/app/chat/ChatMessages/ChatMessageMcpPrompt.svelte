@@ -5,7 +5,8 @@
 		ChatMessageMcpPromptContent
 	} from '$lib/components/app';
 	import { getMessageEditContext } from '$lib/contexts';
-	import { MessageRole, McpPromptVariant } from '$lib/enums';
+	import { McpPromptVariant, MessageRole } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import type { DatabaseMessageExtraMcpPrompt } from '$lib/types';
 
 	interface Props {
@@ -48,7 +49,7 @@
 </script>
 
 <div
-	aria-label="MCP Prompt message with actions"
+	aria-label={m.chat_message_mcp_prompt_aria()}
 	class="group flex flex-col items-end gap-3 md:gap-2 {className}"
 	role="group"
 >

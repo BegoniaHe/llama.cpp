@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Clock, Gauge, WholeWord, BookOpenText, Sparkles, Wrench, Layers } from '@lucide/svelte';
 	import { BadgeChatStatistic } from '$lib/components/app';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { DEFAULT_PERFORMANCE_TIME, MS_PER_SECOND } from '$lib/constants';
 	import { ChatMessageStatsView } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import type { ChatMessageAgenticTimings } from '$lib/types/chat';
 	import { formatPerformanceTime } from '$lib/utils';
-	import { MS_PER_SECOND, DEFAULT_PERFORMANCE_TIME } from '$lib/constants';
+	import { BookOpenText, Clock, Gauge, Layers, Sparkles, WholeWord, Wrench } from '@lucide/svelte';
 
 	interface Props {
 		predictedTokens?: number;
@@ -129,12 +130,12 @@
 					>
 						<BookOpenText class="h-3 w-3" />
 
-						<span class="sr-only">Reading</span>
+						<span class="sr-only">{m.chat_message_stats_reading_sr()}</span>
 					</button>
 				</Tooltip.Trigger>
 
 				<Tooltip.Content>
-					<p>Reading (prompt processing)</p>
+					<p>{m.chat_message_stats_reading_tooltip()}</p>
 				</Tooltip.Content>
 			</Tooltip.Root>
 		{/if}
@@ -153,15 +154,15 @@
 				>
 					<Sparkles class="h-3 w-3" />
 
-					<span class="sr-only">Generation</span>
+					<span class="sr-only">{m.chat_message_stats_generation_sr()}</span>
 				</button>
 			</Tooltip.Trigger>
 
 			<Tooltip.Content>
 				<p>
 					{isGenerationDisabled
-						? 'Generation (waiting for tokens...)'
-						: 'Generation (token output)'}
+						? m.chat_message_stats_generation_waiting_tooltip()
+						: m.chat_message_stats_generation_tooltip()}
 				</p>
 			</Tooltip.Content>
 		</Tooltip.Root>
@@ -179,12 +180,12 @@
 					>
 						<Wrench class="h-3 w-3" />
 
-						<span class="sr-only">Tools</span>
+						<span class="sr-only">{m.chat_message_stats_tools_sr()}</span>
 					</button>
 				</Tooltip.Trigger>
 
 				<Tooltip.Content>
-					<p>Tool calls</p>
+					<p>{m.chat_message_stats_tools_tooltip()}</p>
 				</Tooltip.Content>
 			</Tooltip.Root>
 
@@ -201,12 +202,12 @@
 						>
 							<Layers class="h-3 w-3" />
 
-							<span class="sr-only">Summary</span>
+							<span class="sr-only">{m.chat_message_stats_summary_sr()}</span>
 						</button>
 					</Tooltip.Trigger>
 
 					<Tooltip.Content>
-						<p>Agentic summary</p>
+						<p>{m.chat_message_stats_summary_tooltip()}</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			{/if}
@@ -218,85 +219,95 @@
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={WholeWord}
-				value="{predictedTokens?.toLocaleString()} tokens"
-				tooltipLabel="Generated tokens"
+				value={m.chat_message_stats_tokens_value({
+					count: predictedTokens?.toLocaleString() ?? '0'
+				})}
+				tooltipLabel={m.chat_message_stats_generated_tokens()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Clock}
 				value={formattedTime}
-				tooltipLabel="Generation time"
+				tooltipLabel={m.chat_message_stats_generation_time()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Gauge}
-				value="{tokensPerSecond.toFixed(2)} t/s"
-				tooltipLabel="Generation speed"
+				value={m.chat_message_stats_tokens_per_second_value({ value: tokensPerSecond.toFixed(2) })}
+				tooltipLabel={m.chat_message_stats_generation_speed()}
 			/>
 		{:else if activeView === ChatMessageStatsView.TOOLS && hasAgenticStats}
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Wrench}
-				value="{agenticTimings!.toolCallsCount} calls"
-				tooltipLabel="Tool calls executed"
+				value={m.chat_message_stats_tool_calls_value({
+					count: String(agenticTimings!.toolCallsCount)
+				})}
+				tooltipLabel={m.chat_message_stats_tool_calls_executed()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Clock}
 				value={formattedAgenticToolsTime}
-				tooltipLabel="Tool execution time"
+				tooltipLabel={m.chat_message_stats_tool_execution_time()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Gauge}
-				value="{agenticToolsPerSecond.toFixed(2)} calls/s"
-				tooltipLabel="Tool execution rate"
+				value={m.chat_message_stats_calls_per_second_value({
+					value: agenticToolsPerSecond.toFixed(2)
+				})}
+				tooltipLabel={m.chat_message_stats_tool_execution_rate()}
 			/>
 		{:else if activeView === ChatMessageStatsView.SUMMARY && hasAgenticStats}
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Layers}
-				value="{agenticTimings!.turns} turns"
-				tooltipLabel="Agentic turns (LLM calls)"
+				value={m.chat_message_stats_turns_value({ count: String(agenticTimings!.turns) })}
+				tooltipLabel={m.chat_message_stats_agentic_turns()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={WholeWord}
-				value="{agenticTimings!.llm.predicted_n.toLocaleString()} tokens"
-				tooltipLabel="Total tokens generated"
+				value={m.chat_message_stats_tokens_value({
+					count: agenticTimings!.llm.predicted_n.toLocaleString()
+				})}
+				tooltipLabel={m.chat_message_stats_total_tokens_generated()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Clock}
 				value={formattedAgenticTotalTime}
-				tooltipLabel="Total time (LLM + tools)"
+				tooltipLabel={m.chat_message_stats_total_time()}
 			/>
 		{:else if hasPromptStats}
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={WholeWord}
-				value="{promptTokens} tokens"
-				tooltipLabel="Prompt tokens"
+				value={m.chat_message_stats_tokens_value({ count: promptTokens?.toLocaleString() ?? '0' })}
+				tooltipLabel={m.chat_message_stats_prompt_tokens()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Clock}
-				value={formattedPromptTime ?? '0s'}
-				tooltipLabel="Prompt processing time"
+				value={formattedPromptTime ?? m.chat_message_stats_zero_seconds()}
+				tooltipLabel={m.chat_message_stats_prompt_processing_time()}
 			/>
 
 			<BadgeChatStatistic
 				class="bg-transparent"
 				icon={Gauge}
-				value="{promptTokensPerSecond!.toFixed(2)} tokens/s"
-				tooltipLabel="Prompt processing speed"
+				value={m.chat_message_stats_tokens_per_second_value({
+					value: promptTokensPerSecond!.toFixed(2)
+				})}
+				tooltipLabel={m.chat_message_stats_prompt_processing_speed()}
 			/>
 		{/if}
 	</div>

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Card } from '$lib/components/ui/card';
 	import { ChatAttachmentsList, MarkdownContent } from '$lib/components/app';
+	import { Card } from '$lib/components/ui/card';
 	import { getMessageEditContext } from '$lib/contexts';
+	import { MessageRole } from '$lib/enums';
+	import { m } from '$lib/paraglide/messages';
 	import { config } from '$lib/stores/settings.svelte';
 	import ChatMessageActions from './ChatMessageActions.svelte';
 	import ChatMessageEditForm from './ChatMessageEditForm.svelte';
-	import { MessageRole } from '$lib/enums';
 
 	interface Props {
 		class?: string;
@@ -75,7 +76,7 @@
 </script>
 
 <div
-	aria-label="User message with actions"
+	aria-label={m.chat_message_user_aria()}
 	class="group flex flex-col items-end gap-3 md:gap-2 {className}"
 	role="group"
 >
