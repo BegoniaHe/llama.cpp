@@ -52,10 +52,12 @@
 	name="Default"
 	play={async () => {
 		const { conversationsStore } = await import('$lib/stores/conversations.svelte');
-		
-		waitFor(() => setTimeout(() => {
-			conversationsStore.conversations = mockConversations;
-		}, 0));
+
+		waitFor(() =>
+			setTimeout(() => {
+				conversationsStore.conversations = mockConversations;
+			}, 0)
+		);
 	}}
 >
 	<div class="flex-column h-full h-screen w-72 bg-background">
@@ -68,11 +70,13 @@
 	name="SearchActive"
 	play={async ({ userEvent }) => {
 		const { conversationsStore } = await import('$lib/stores/conversations.svelte');
-		
-		waitFor(() => setTimeout(() => {
-			conversationsStore.conversations = mockConversations;
-		}, 0));
-		
+
+		waitFor(() =>
+			setTimeout(() => {
+				conversationsStore.conversations = mockConversations;
+			}, 0)
+		);
+
 		const searchTrigger = screen.getByText(m.chat_sidebar_search_conversations());
 		userEvent.click(searchTrigger);
 	}}

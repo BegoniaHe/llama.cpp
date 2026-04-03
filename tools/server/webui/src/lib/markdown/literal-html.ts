@@ -1,7 +1,11 @@
+import { LINE_BREAK, NBSP, PHRASE_PARENTS, TAB_AS_SPACES } from '$lib/constants';
+import type { Break, Content, Paragraph, PhrasingContent, Root, Text } from 'mdast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { Break, Content, Paragraph, PhrasingContent, Root, Text } from 'mdast';
-import { LINE_BREAK, NBSP, PHRASE_PARENTS, TAB_AS_SPACES } from '$lib/constants';
+
+interface LiteralHtmlData {
+	literalHtml?: boolean;
+}
 
 /**
  * remark plugin that rewrites raw HTML nodes into plain-text equivalents.
@@ -73,7 +77,7 @@ export const remarkLiteralHtml: Plugin<[], Root> = () => {
 				const paragraph: Paragraph = {
 					type: 'paragraph',
 					children: replacement as Paragraph['children'],
-					data: { literalHtml: true }
+					data: { literalHtml: true } as Paragraph['data'] & LiteralHtmlData
 				};
 
 				const siblings = parent.children as unknown as Content[];
@@ -84,7 +88,7 @@ export const remarkLiteralHtml: Plugin<[], Root> = () => {
 
 					if (
 						previous?.type === 'paragraph' &&
-						(previous.data as { literalHtml?: boolean } | undefined)?.literalHtml
+						(previous.data as (Paragraph['data'] & LiteralHtmlData) | undefined)?.literalHtml
 					) {
 						const prevChildren = previous.children as unknown as PhrasingContent[];
 
