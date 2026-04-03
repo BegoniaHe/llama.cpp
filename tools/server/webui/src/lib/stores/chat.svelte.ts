@@ -11,14 +11,13 @@
  * @see ChatService in services/chat.service.ts for API operations
  */
 
-import {
-	INACTIVE_CONVERSATION_STATE_MAX_AGE_MS,
-	MAX_INACTIVE_CONVERSATION_STATES,
-	SYSTEM_MESSAGE_PLACEHOLDER
-} from '$lib/constants';
-import { ErrorDialogType, MessageRole, MessageType } from '$lib/enums';
+import { SYSTEM_MESSAGE_PLACEHOLDER } from '$lib/constants';
+import { MessageRole, MessageType } from '$lib/enums';
 import { ChatService, DatabaseService } from '$lib/services';
 import { agenticStore } from '$lib/stores/agentic.svelte';
+import { ChatMessageMutations } from '$lib/stores/chat/chat-message-mutations';
+import { ChatRecoveryPolicy } from '$lib/stores/chat/chat-recovery-policy.svelte';
+import { ChatRequestStateManager } from '$lib/stores/chat/chat-request-state.svelte';
 import { conversationsStore } from '$lib/stores/conversations.svelte';
 import { mcpStore } from '$lib/stores/mcp.svelte';
 import {
@@ -43,142 +42,119 @@ import {
 	isAbortError,
 	normalizeModelName
 } from '$lib/utils';
-import { SvelteMap } from 'svelte/reactivity';
-
-interface ConversationStateEntry {
-	lastAccessed: number;
-}
 
 class ChatStore {
-	activeProcessingState = $state<ApiProcessingState | null>(null);
-	currentResponse = $state('');
-	errorDialogState = $state<ErrorDialogState | null>(null);
-	isLoading = $state(false);
-	chatLoadingStates = new SvelteMap<string, boolean>();
-	chatStreamingStates = new SvelteMap<string, { response: string; messageId: string }>();
-	private abortControllers = new SvelteMap<string, AbortController>();
-	private processingStates = new SvelteMap<string, ApiProcessingState | null>();
-	private conversationStateTimestamps = new SvelteMap<string, ConversationStateEntry>();
-	private activeConversationId = $state<string | null>(null);
-	private isStreamingActive = $state(false);
+	private requestState = new ChatRequestStateManager();
+	private messageMutations = new ChatMessageMutations();
+	private recoveryPolicy = new ChatRecoveryPolicy(this.requestState, this.messageMutations);
+
 	private isEditModeActive = $state(false);
 	private addFilesHandler: ((files: File[]) => void) | null = $state(null);
 	pendingEditMessageId = $state<string | null>(null);
-	private messageUpdateCallback:
-		| ((messageId: string, updates: Partial<DatabaseMessage>) => void)
-		| null = null;
 	private _pendingDraftMessage = $state<string>('');
 	private _pendingDraftFiles = $state<ChatUploadedFile[]>([]);
 
+	get activeProcessingState(): ApiProcessingState | null {
+		return this.requestState.activeProcessingState;
+	}
+
+	get currentResponse(): string {
+		return this.requestState.currentResponse;
+	}
+
+	get errorDialogState(): ErrorDialogState | null {
+		return this.recoveryPolicy.errorDialogState;
+	}
+
+	get isLoading(): boolean {
+		return this.requestState.isLoading;
+	}
+
+	set isLoading(value: boolean) {
+		this.requestState.isLoading = value;
+	}
+
+	private isActiveConversation(convId: string): boolean {
+		return convId === conversationsStore.activeConversation?.id;
+	}
+
 	private setChatLoading(convId: string, loading: boolean): void {
-		this.touchConversationState(convId);
-		if (loading) {
-			this.chatLoadingStates.set(convId, true);
-			if (convId === conversationsStore.activeConversation?.id) this.isLoading = true;
-		} else {
-			this.chatLoadingStates.delete(convId);
-			if (convId === conversationsStore.activeConversation?.id) this.isLoading = false;
-		}
+		this.requestState.setChatLoading(convId, loading, this.isActiveConversation(convId));
 	}
+
 	private setChatStreaming(convId: string, response: string, messageId: string): void {
-		this.touchConversationState(convId);
-		this.chatStreamingStates.set(convId, { response, messageId });
-		if (convId === conversationsStore.activeConversation?.id) this.currentResponse = response;
+		this.requestState.setChatStreaming(
+			convId,
+			response,
+			messageId,
+			this.isActiveConversation(convId)
+		);
 	}
+
 	private clearChatStreaming(convId: string): void {
-		this.chatStreamingStates.delete(convId);
-		if (convId === conversationsStore.activeConversation?.id) this.currentResponse = '';
+		this.requestState.clearChatStreaming(convId, this.isActiveConversation(convId));
 	}
+
 	private getChatStreaming(convId: string): { response: string; messageId: string } | undefined {
-		return this.chatStreamingStates.get(convId);
+		return this.requestState.getChatStreaming(convId);
 	}
+
 	syncLoadingStateForChat(convId: string): void {
-		this.isLoading = this.chatLoadingStates.get(convId) || false;
-		const s = this.chatStreamingStates.get(convId);
-		this.currentResponse = s?.response || '';
-		this.isStreamingActive = s !== undefined;
-		this.setActiveProcessingConversation(convId);
-		// Sync streaming content to activeMessages so UI displays current content
-		if (s?.response && s?.messageId) {
-			const idx = conversationsStore.findMessageIndex(s.messageId);
-			if (idx !== -1) {
-				conversationsStore.updateMessageAtIndex(idx, { content: s.response });
-			}
-		}
+		this.requestState.syncLoadingStateForChat(convId, (messageId, response) => {
+			this.messageMutations.updateStreamingMessageContent(messageId, response);
+		});
 	}
 
 	clearUIState(): void {
-		this.isLoading = false;
-		this.currentResponse = '';
-		this.isStreamingActive = false;
+		this.requestState.clearUIState();
 	}
 
 	setActiveProcessingConversation(conversationId: string | null): void {
-		this.activeConversationId = conversationId;
-		this.activeProcessingState = conversationId
-			? this.processingStates.get(conversationId) || null
-			: null;
+		this.requestState.setActiveProcessingConversation(conversationId);
 	}
 
 	getProcessingState(conversationId: string): ApiProcessingState | null {
-		return this.processingStates.get(conversationId) || null;
+		return this.requestState.getProcessingState(conversationId);
 	}
 
 	private setProcessingState(conversationId: string, state: ApiProcessingState | null): void {
-		if (state === null) this.processingStates.delete(conversationId);
-		else this.processingStates.set(conversationId, state);
-		if (conversationId === this.activeConversationId) this.activeProcessingState = state;
+		this.requestState.setProcessingState(conversationId, state);
 	}
 
 	clearProcessingState(conversationId: string): void {
-		this.processingStates.delete(conversationId);
-		if (conversationId === this.activeConversationId) this.activeProcessingState = null;
+		this.requestState.clearProcessingState(conversationId);
 	}
 
 	getActiveProcessingState(): ApiProcessingState | null {
-		return this.activeProcessingState;
+		return this.requestState.getActiveProcessingState();
 	}
 
 	getCurrentProcessingStateSync(): ApiProcessingState | null {
-		return this.activeProcessingState;
+		return this.requestState.getCurrentProcessingStateSync();
 	}
 
 	private setStreamingActive(active: boolean): void {
-		this.isStreamingActive = active;
+		this.requestState.setStreamingActive(active);
 	}
 
 	isStreaming(): boolean {
-		return this.isStreamingActive;
+		return this.requestState.isStreaming();
 	}
 
 	private getOrCreateAbortController(convId: string): AbortController {
-		let c = this.abortControllers.get(convId);
-		if (!c || c.signal.aborted) {
-			c = new AbortController();
-			this.abortControllers.set(convId, c);
-		}
-		return c;
+		return this.requestState.getOrCreateAbortController(convId);
 	}
 
 	private abortRequest(convId?: string): void {
-		if (convId) {
-			const c = this.abortControllers.get(convId);
-			if (c) {
-				c.abort();
-				this.abortControllers.delete(convId);
-			}
-		} else {
-			for (const c of this.abortControllers.values()) c.abort();
-			this.abortControllers.clear();
-		}
+		this.requestState.abortRequest(convId);
 	}
 
 	private showErrorDialog(state: ErrorDialogState | null): void {
-		this.errorDialogState = state;
+		this.recoveryPolicy.showErrorDialog(state);
 	}
 
 	dismissErrorDialog(): void {
-		this.errorDialogState = null;
+		this.recoveryPolicy.dismissErrorDialog();
 	}
 
 	clearEditMode(): void {
@@ -221,11 +197,11 @@ class ChatStore {
 	}
 
 	getAllLoadingChats(): string[] {
-		return Array.from(this.chatLoadingStates.keys());
+		return this.requestState.getAllLoadingChats();
 	}
 
 	getAllStreamingChats(): string[] {
-		return Array.from(this.chatStreamingStates.keys());
+		return this.requestState.getAllStreamingChats();
 	}
 
 	getChatStreamingPublic(convId: string): { response: string; messageId: string } | undefined {
@@ -233,69 +209,18 @@ class ChatStore {
 	}
 
 	isChatLoadingPublic(convId: string): boolean {
-		return this.chatLoadingStates.get(convId) || false;
+		return this.requestState.isChatLoadingPublic(convId);
 	}
 
 	private isChatLoadingInternal(convId: string): boolean {
-		return this.chatStreamingStates.has(convId);
-	}
-
-	private touchConversationState(convId: string): void {
-		this.conversationStateTimestamps.set(convId, { lastAccessed: Date.now() });
+		return this.requestState.hasActiveRequest(convId);
 	}
 
 	cleanupOldConversationStates(activeConversationIds?: string[]): number {
-		const now = Date.now();
-		const activeIdsList = activeConversationIds ?? [];
-		const preserveIds = this.activeConversationId
-			? [...activeIdsList, this.activeConversationId]
-			: activeIdsList;
-		const allConvIds = [
-			...new Set([
-				...this.chatLoadingStates.keys(),
-				...this.chatStreamingStates.keys(),
-				...this.abortControllers.keys(),
-				...this.processingStates.keys(),
-				...this.conversationStateTimestamps.keys()
-			])
-		];
-		const cleanupCandidates: Array<{ convId: string; lastAccessed: number }> = [];
-		for (const convId of allConvIds) {
-			if (preserveIds.includes(convId)) continue;
-			if (this.chatLoadingStates.get(convId)) continue;
-			if (this.chatStreamingStates.has(convId)) continue;
-			const ts = this.conversationStateTimestamps.get(convId);
-			cleanupCandidates.push({ convId, lastAccessed: ts?.lastAccessed ?? 0 });
-		}
-		cleanupCandidates.sort((a, b) => a.lastAccessed - b.lastAccessed);
-		let cleanedUp = 0;
-		for (const { convId, lastAccessed } of cleanupCandidates) {
-			if (
-				cleanupCandidates.length - cleanedUp > MAX_INACTIVE_CONVERSATION_STATES ||
-				now - lastAccessed > INACTIVE_CONVERSATION_STATE_MAX_AGE_MS
-			) {
-				this.cleanupConversationState(convId);
-				cleanedUp++;
-			}
-		}
-		return cleanedUp;
-	}
-	private cleanupConversationState(convId: string): void {
-		const c = this.abortControllers.get(convId);
-		if (c && !c.signal.aborted) c.abort();
-		this.chatLoadingStates.delete(convId);
-		this.chatStreamingStates.delete(convId);
-		this.abortControllers.delete(convId);
-		this.processingStates.delete(convId);
-		this.conversationStateTimestamps.delete(convId);
+		return this.requestState.cleanupOldConversationStates(activeConversationIds);
 	}
 	getTrackedConversationCount(): number {
-		return new Set([
-			...this.chatLoadingStates.keys(),
-			...this.chatStreamingStates.keys(),
-			...this.abortControllers.keys(),
-			...this.processingStates.keys()
-		]).size;
+		return this.requestState.getTrackedConversationCount();
 	}
 
 	private getMessageByIdWithRole(
@@ -441,19 +366,7 @@ class ChatStore {
 	private async createAssistantMessage(parentId?: string): Promise<DatabaseMessage> {
 		const activeConv = conversationsStore.activeConversation;
 		if (!activeConv) throw new Error('No active conversation');
-		return await DatabaseService.createMessageBranch(
-			{
-				convId: activeConv.id,
-				type: MessageType.TEXT,
-				role: MessageRole.ASSISTANT,
-				content: '',
-				timestamp: Date.now(),
-				toolCalls: '',
-				children: [],
-				model: null
-			},
-			parentId || null
-		);
+		return await this.messageMutations.createAssistantMessage(activeConv.id, parentId || null);
 	}
 
 	async sendMessage(content: string, extras?: DatabaseMessageExtra[]): Promise<void> {
@@ -472,7 +385,7 @@ class ChatStore {
 		}
 		const currentConv = conversationsStore.activeConversation;
 		if (!currentConv) return;
-		this.showErrorDialog(null);
+		this.recoveryPolicy.clearErrorDialog();
 		this.setChatLoading(currentConv.id, true);
 		this.clearChatStreaming(currentConv.id);
 		try {
@@ -507,24 +420,8 @@ class ChatStore {
 				assistantMessage
 			);
 		} catch (error) {
-			if (isAbortError(error)) {
-				this.setChatLoading(currentConv.id, false);
-				return;
-			}
 			console.error('Failed to send message:', error);
-			this.setChatLoading(currentConv.id, false);
-			const dialogType =
-				error instanceof Error && error.name === 'TimeoutError'
-					? ErrorDialogType.TIMEOUT
-					: ErrorDialogType.SERVER;
-			const contextInfo = (
-				error as Error & { contextInfo?: { n_prompt_tokens: number; n_ctx: number } }
-			).contextInfo;
-			this.showErrorDialog({
-				type: dialogType,
-				message: error instanceof Error ? error.message : 'Unknown error',
-				contextInfo
-			});
+			this.recoveryPolicy.handleRequestFailure(error, currentConv.id);
 		}
 	}
 
@@ -560,8 +457,7 @@ class ChatStore {
 			const n = normalizeModelName(modelName);
 			if (!n || n === resolvedModel) return;
 			resolvedModel = n;
-			const idx = conversationsStore.findMessageIndex(currentMessageId);
-			conversationsStore.updateMessageAtIndex(idx, { model: n });
+			this.messageMutations.updateActiveMessage(currentMessageId, { model: n });
 			if (persistImmediately && !modelPersisted) {
 				modelPersisted = true;
 				DatabaseService.updateMessage(currentMessageId, { model: n }).catch(() => {
@@ -573,8 +469,7 @@ class ChatStore {
 
 		const updateStreamingUI = () => {
 			this.setChatStreaming(convId, streamedContent, currentMessageId);
-			const idx = conversationsStore.findMessageIndex(currentMessageId);
-			conversationsStore.updateMessageAtIndex(idx, { content: streamedContent });
+			this.messageMutations.updateStreamingMessageContent(currentMessageId, streamedContent);
 		};
 
 		const cleanupStreamingState = () => {
@@ -595,30 +490,19 @@ class ChatStore {
 			},
 			onReasoningChunk: (chunk: string) => {
 				streamedReasoningContent += chunk;
-				// Update UI to show reasoning is being received
-				const idx = conversationsStore.findMessageIndex(currentMessageId);
-				conversationsStore.updateMessageAtIndex(idx, {
-					reasoningContent: streamedReasoningContent
-				});
+				this.messageMutations.updateStreamingReasoning(currentMessageId, streamedReasoningContent);
 			},
 			onToolCallsStreaming: (toolCalls) => {
-				const idx = conversationsStore.findMessageIndex(currentMessageId);
-				conversationsStore.updateMessageAtIndex(idx, { toolCalls: JSON.stringify(toolCalls) });
+				this.messageMutations.updateStreamingToolCalls(currentMessageId, JSON.stringify(toolCalls));
 			},
 			onAttachments: (messageId: string, extras: DatabaseMessageExtra[]) => {
-				if (!extras.length) return;
-				const idx = conversationsStore.findMessageIndex(messageId);
-				if (idx === -1) return;
-				const msg = conversationsStore.activeMessages[idx];
-				const updatedExtras = [...(msg.extra || []), ...extras];
-				conversationsStore.updateMessageAtIndex(idx, { extra: updatedExtras });
-				DatabaseService.updateMessage(messageId, { extra: updatedExtras }).catch(console.error);
+				this.messageMutations.appendMessageExtras(messageId, extras).catch(console.error);
 			},
 			onModel: (modelName: string) => recordModel(modelName),
 			onTurnComplete: (intermediateTimings: ChatMessageTimings) => {
-				// Update the first assistant message with cumulative agentic timings
-				const idx = conversationsStore.findMessageIndex(assistantMessage.id);
-				conversationsStore.updateMessageAtIndex(idx, { timings: intermediateTimings });
+				this.messageMutations.updateActiveMessage(assistantMessage.id, {
+					timings: intermediateTimings
+				});
 			},
 			onTimings: (timings?: ChatMessageTimings, promptProgress?: ChatMessagePromptProgress) => {
 				const tokensPerSecond =
@@ -650,8 +534,6 @@ class ChatStore {
 					timings
 				};
 				if (resolvedModel && !modelPersisted) updateData.model = resolvedModel;
-				await DatabaseService.updateMessage(currentMessageId, updateData);
-				const idx = conversationsStore.findMessageIndex(currentMessageId);
 				const uiUpdate: Partial<DatabaseMessage> = {
 					content,
 					reasoningContent: reasoningContent || undefined,
@@ -659,27 +541,21 @@ class ChatStore {
 				};
 				if (timings) uiUpdate.timings = timings;
 				if (resolvedModel) uiUpdate.model = resolvedModel;
-				conversationsStore.updateMessageAtIndex(idx, uiUpdate);
-				await conversationsStore.updateCurrentNode(currentMessageId);
+				await this.messageMutations.persistAndUpdateMessage(currentMessageId, uiUpdate, {
+					updateCurrentNode: true
+				});
 			},
 			createToolResultMessage: async (
 				toolCallId: string,
 				content: string,
 				extras?: DatabaseMessageExtra[]
 			) => {
-				const msg = await DatabaseService.createMessageBranch(
-					{
-						convId,
-						type: MessageType.TEXT,
-						role: MessageRole.TOOL,
-						content,
-						toolCallId,
-						timestamp: Date.now(),
-						toolCalls: '',
-						children: [],
-						extra: extras
-					},
-					currentMessageId
+				const msg = await this.messageMutations.createToolResultMessage(
+					convId,
+					currentMessageId,
+					toolCallId,
+					content,
+					extras
 				);
 				conversationsStore.addMessageToActive(msg);
 				await conversationsStore.updateCurrentNode(msg.id);
@@ -692,18 +568,10 @@ class ChatStore {
 
 				const lastMsg =
 					conversationsStore.activeMessages[conversationsStore.activeMessages.length - 1];
-				const msg = await DatabaseService.createMessageBranch(
-					{
-						convId,
-						type: MessageType.TEXT,
-						role: MessageRole.ASSISTANT,
-						content: '',
-						timestamp: Date.now(),
-						toolCalls: '',
-						children: [],
-						model: resolvedModel
-					},
-					lastMsg.id
+				const msg = await this.messageMutations.createAssistantMessage(
+					convId,
+					lastMsg.id,
+					resolvedModel
 				);
 				conversationsStore.addMessageToActive(msg);
 				currentMessageId = msg.id;
@@ -711,9 +579,9 @@ class ChatStore {
 			},
 			onFlowComplete: (finalTimings?: ChatMessageTimings) => {
 				if (finalTimings) {
-					const idx = conversationsStore.findMessageIndex(assistantMessage.id);
-
-					conversationsStore.updateMessageAtIndex(idx, { timings: finalTimings });
+					this.messageMutations.updateActiveMessage(assistantMessage.id, {
+						timings: finalTimings
+					});
 					DatabaseService.updateMessage(assistantMessage.id, { timings: finalTimings }).catch(
 						console.error
 					);
@@ -725,27 +593,15 @@ class ChatStore {
 				if (isRouterMode()) modelsStore.fetchRouterModels().catch(console.error);
 			},
 			onError: (error: Error) => {
-				this.setStreamingActive(false);
-				if (isAbortError(error)) {
-					cleanupStreamingState();
-					return;
-				}
 				console.error('Streaming error:', error);
-				cleanupStreamingState();
-				const idx = conversationsStore.findMessageIndex(assistantMessage.id);
-				if (idx !== -1) {
-					const failedMessage = conversationsStore.removeMessageAtIndex(idx);
-					if (failedMessage) DatabaseService.deleteMessage(failedMessage.id).catch(console.error);
-				}
-				const contextInfo = (
-					error as Error & { contextInfo?: { n_prompt_tokens: number; n_ctx: number } }
-				).contextInfo;
-				this.showErrorDialog({
-					type: error.name === 'TimeoutError' ? ErrorDialogType.TIMEOUT : ErrorDialogType.SERVER,
-					message: error.message,
-					contextInfo
-				});
-				if (onError) onError(error);
+				this.recoveryPolicy
+					.handleStreamingFailure({
+						error,
+						conversationId: convId,
+						assistantMessageId: assistantMessage.id,
+						onError
+					})
+					.catch(console.error);
 			}
 		};
 
@@ -783,24 +639,16 @@ class ChatStore {
 				) => {
 					const content = streamedContent || finalContent || '';
 					const reasoning = streamedReasoningContent || reasoningContent;
-					const updateData: Record<string, unknown> = {
+					const updateData: Partial<DatabaseMessage> = {
 						content,
 						reasoningContent: reasoning || undefined,
 						toolCalls: toolCalls || '',
 						timings
 					};
 					if (resolvedModel && !modelPersisted) updateData.model = resolvedModel;
-					await DatabaseService.updateMessage(currentMessageId, updateData);
-					const idx = conversationsStore.findMessageIndex(currentMessageId);
-					const uiUpdate: Partial<DatabaseMessage> = {
-						content,
-						reasoningContent: reasoning || undefined,
-						toolCalls: toolCalls || ''
-					};
-					if (timings) uiUpdate.timings = timings;
-					if (resolvedModel) uiUpdate.model = resolvedModel;
-					conversationsStore.updateMessageAtIndex(idx, uiUpdate);
-					await conversationsStore.updateCurrentNode(currentMessageId);
+					await this.messageMutations.persistAndUpdateMessage(currentMessageId, updateData, {
+						updateCurrentNode: true
+					});
 					cleanupStreamingState();
 					if (onComplete) await onComplete(content);
 					if (isRouterMode()) modelsStore.fetchRouterModels().catch(console.error);
@@ -830,38 +678,11 @@ class ChatStore {
 		if (!conversationId) return;
 		const streamingState = this.getChatStreaming(conversationId);
 		if (!streamingState || !streamingState.response.trim()) return;
-		const messages =
-			conversationId === conversationsStore.activeConversation?.id
-				? conversationsStore.activeMessages
-				: await conversationsStore.getConversationMessages(conversationId);
-		if (!messages.length) return;
-		const lastMessage = messages[messages.length - 1];
-		if (lastMessage?.role === MessageRole.ASSISTANT) {
-			try {
-				const updateData: { content: string; timings?: ChatMessageTimings } = {
-					content: streamingState.response
-				};
-				const lastKnownState = this.getProcessingState(conversationId);
-				if (lastKnownState) {
-					updateData.timings = {
-						prompt_n: lastKnownState.promptTokens || 0,
-						prompt_ms: lastKnownState.promptMs,
-						predicted_n: lastKnownState.tokensDecoded || 0,
-						cache_n: lastKnownState.cacheTokens || 0,
-						predicted_ms:
-							lastKnownState.tokensPerSecond && lastKnownState.tokensDecoded
-								? (lastKnownState.tokensDecoded / lastKnownState.tokensPerSecond) * 1000
-								: undefined
-					};
-				}
-				await DatabaseService.updateMessage(lastMessage.id, updateData);
-				lastMessage.content = streamingState.response;
-				if (updateData.timings) lastMessage.timings = updateData.timings;
-			} catch (error) {
-				lastMessage.content = streamingState.response;
-				console.error('Failed to save partial response:', error);
-			}
-		}
+		await this.messageMutations.savePartialAssistantResponse(
+			conversationId,
+			streamingState.response,
+			this.getProcessingState(conversationId)
+		);
 	}
 
 	async updateMessage(messageId: string, newContent: string): Promise<void> {
@@ -1086,7 +907,7 @@ class ChatStore {
 		const { message: msg, index: idx } = result;
 
 		try {
-			this.showErrorDialog(null);
+			this.recoveryPolicy.clearErrorDialog();
 			this.setChatLoading(activeConv.id, true);
 			this.clearChatStreaming(activeConv.id);
 
@@ -1112,7 +933,7 @@ class ChatStore {
 
 			const updateStreamingContent = (fullContent: string) => {
 				this.setChatStreaming(msg.convId, fullContent, msg.id);
-				conversationsStore.updateMessageAtIndex(idx, { content: fullContent });
+				this.messageMutations.updateActiveMessage(msg.id, { content: fullContent });
 			};
 
 			const abortController = this.getOrCreateAbortController(msg.convId);
@@ -1129,7 +950,7 @@ class ChatStore {
 					onReasoningChunk: (chunk: string) => {
 						appendedReasoning += chunk;
 						hasReceivedContent = true;
-						conversationsStore.updateMessageAtIndex(idx, {
+						this.messageMutations.updateActiveMessage(msg.id, {
 							reasoningContent: originalReasoning + appendedReasoning
 						});
 					},
@@ -1162,14 +983,7 @@ class ChatStore {
 						const fullContent = originalContent + finalAppendedContent;
 						const fullReasoning = originalReasoning + finalAppendedReasoning || undefined;
 
-						await DatabaseService.updateMessage(msg.id, {
-							content: fullContent,
-							reasoningContent: fullReasoning,
-							timestamp: Date.now(),
-							timings
-						});
-
-						conversationsStore.updateMessageAtIndex(idx, {
+						await this.messageMutations.persistAndUpdateMessage(msg.id, {
 							content: fullContent,
 							reasoningContent: fullReasoning,
 							timestamp: Date.now(),
@@ -1183,40 +997,16 @@ class ChatStore {
 						this.setProcessingState(msg.convId, null);
 					},
 					onError: async (error: Error) => {
-						if (isAbortError(error)) {
-							if (hasReceivedContent && appendedContent) {
-								await DatabaseService.updateMessage(msg.id, {
-									content: originalContent + appendedContent,
-									reasoningContent: originalReasoning + appendedReasoning || undefined,
-									timestamp: Date.now()
-								});
-
-								conversationsStore.updateMessageAtIndex(idx, {
-									content: originalContent + appendedContent,
-									reasoningContent: originalReasoning + appendedReasoning || undefined,
-									timestamp: Date.now()
-								});
-							}
-
-							this.setChatLoading(msg.convId, false);
-							this.clearChatStreaming(msg.convId);
-							this.setProcessingState(msg.convId, null);
-
-							return;
-						}
-
 						console.error('Continue generation error:', error);
-						conversationsStore.updateMessageAtIndex(idx, { content: originalContent });
-
-						await DatabaseService.updateMessage(msg.id, { content: originalContent });
-
-						this.setChatLoading(msg.convId, false);
-						this.clearChatStreaming(msg.convId);
-						this.setProcessingState(msg.convId, null);
-						this.showErrorDialog({
-							type:
-								error.name === 'TimeoutError' ? ErrorDialogType.TIMEOUT : ErrorDialogType.SERVER,
-							message: error.message
+						await this.recoveryPolicy.handleContinueFailure({
+							error,
+							conversationId: msg.convId,
+							messageId: msg.id,
+							originalContent,
+							originalReasoning,
+							appendedContent,
+							appendedReasoning,
+							hasReceivedContent
 						});
 					}
 				},
@@ -1226,7 +1016,7 @@ class ChatStore {
 			);
 		} catch (error) {
 			if (!isAbortError(error)) console.error('Failed to continue message:', error);
-			if (activeConv) this.setChatLoading(activeConv.id, false);
+			if (activeConv) this.recoveryPolicy.handleRequestFailure(error, activeConv.id);
 		}
 	}
 
@@ -1423,7 +1213,7 @@ class ChatStore {
 	}
 
 	private getContextTotal(): number | null {
-		const activeConvId = this.activeConversationId;
+		const activeConvId = this.requestState.getActiveConversationId();
 		const activeState = activeConvId ? this.getProcessingState(activeConvId) : null;
 
 		if (activeState && typeof activeState.contextTotal === 'number' && activeState.contextTotal > 0)
@@ -1464,7 +1254,7 @@ class ChatStore {
 			return;
 		}
 
-		const targetId = conversationId || this.activeConversationId;
+		const targetId = conversationId || this.requestState.getActiveConversationId();
 		if (targetId) {
 			this.setProcessingState(targetId, processingState);
 		}
