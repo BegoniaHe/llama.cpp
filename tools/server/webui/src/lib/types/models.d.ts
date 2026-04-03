@@ -29,6 +29,23 @@ export interface ParsedModelId {
 	tags: string[];
 }
 
+export type ModelOperationKind = 'load' | 'unload';
+
+export type ModelOperationState = 'pending' | 'success' | 'failed' | 'timed-out';
+
+export interface ModelOperationDiagnostic {
+	modelId: string;
+	operation: ModelOperationKind;
+	expectedStatus: string;
+	state: ModelOperationState;
+	startedAt: number;
+	deadlineAt: number;
+	lastPolledAt?: number;
+	attempts: number;
+	lastObservedStatus: string | null;
+	lastError?: string;
+}
+
 /**
  * Modality capabilities for file validation
  */

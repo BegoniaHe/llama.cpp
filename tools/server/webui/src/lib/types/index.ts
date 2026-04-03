@@ -5,56 +5,57 @@
 
 // API types
 export type {
+	ApiChatCompletionRequest,
+	ApiChatCompletionResponse,
+	ApiChatCompletionStreamChunk,
+	ApiChatCompletionToolCall,
+	ApiChatCompletionToolCallDelta,
+	ApiChatCompletionToolCallFunctionDelta,
 	ApiChatMessageContentPart,
+	ApiChatMessageData,
 	ApiContextSizeError,
 	ApiErrorResponse,
-	ApiChatMessageData,
-	ApiModelStatus,
+	ApiLlamaCppServerProps,
 	ApiModelDataEntry,
 	ApiModelDetails,
 	ApiModelListResponse,
-	ApiLlamaCppServerProps,
-	ApiChatCompletionRequest,
-	ApiChatCompletionToolCallFunctionDelta,
-	ApiChatCompletionToolCallDelta,
-	ApiChatCompletionToolCall,
-	ApiChatCompletionStreamChunk,
-	ApiChatCompletionResponse,
-	ApiSlotData,
+	ApiModelStatus,
 	ApiProcessingState,
 	ApiRouterModelMeta,
+	ApiRouterModelsListResponse,
 	ApiRouterModelsLoadRequest,
 	ApiRouterModelsLoadResponse,
 	ApiRouterModelsStatusRequest,
 	ApiRouterModelsStatusResponse,
-	ApiRouterModelsListResponse,
 	ApiRouterModelsUnloadRequest,
-	ApiRouterModelsUnloadResponse
+	ApiRouterModelsUnloadResponse,
+	ApiSlotData
 } from './api';
 
 // Chat types
 export type {
-	ChatUploadedFile,
+	AttachmentDisplayItemsOptions,
 	ChatAttachmentDisplayItem,
 	ChatAttachmentPreviewItem,
-	ChatMessageSiblingInfo,
-	ChatMessagePromptProgress,
-	ChatMessageTimings,
 	ChatMessageAgenticTimings,
 	ChatMessageAgenticTurnStats,
+	ChatMessagePromptProgress,
+	ChatMessageSiblingInfo,
+	ChatMessageTimings,
 	ChatMessageToolCallTiming,
 	ChatStreamCallbacks,
+	ChatUploadedFile,
 	ErrorDialogState,
-	LiveProcessingStats,
+	FileProcessingResult,
 	LiveGenerationStats,
-	AttachmentDisplayItemsOptions,
-	FileProcessingResult
+	LiveProcessingStats
 } from './chat.d';
 
 // Database types
 export type {
-	McpServerOverride,
 	DatabaseConversation,
+	DatabaseMessage,
+	DatabaseMessageExtra,
 	DatabaseMessageExtraAudioFile,
 	DatabaseMessageExtraImageFile,
 	DatabaseMessageExtraLegacyContext,
@@ -62,92 +63,98 @@ export type {
 	DatabaseMessageExtraMcpResource,
 	DatabaseMessageExtraPdfFile,
 	DatabaseMessageExtraTextFile,
-	DatabaseMessageExtra,
-	DatabaseMessage,
 	ExportedConversation,
-	ExportedConversations
+	ExportedConversations,
+	McpServerOverride
 } from './database';
 
 // Model types
-export type { ModelModalities, ModelOption, ModalityCapabilities } from './models';
+export type {
+	ModalityCapabilities,
+	ModelModalities,
+	ModelOperationDiagnostic,
+	ModelOperationKind,
+	ModelOperationState,
+	ModelOption
+} from './models';
 
 // Settings types
 export type {
-	SettingsConfigValue,
-	SettingsFieldConfig,
+	ParameterInfo,
+	ParameterRecord,
+	ParameterValue,
 	SettingsChatServiceOptions,
 	SettingsConfigType,
-	ParameterValue,
-	ParameterRecord,
-	ParameterInfo,
+	SettingsConfigValue,
+	SettingsFieldConfig,
 	SyncableParameter
 } from './settings';
 
 // Common types
 export type {
-	KeyValuePair,
 	BinaryDetectionOptions,
-	ClipboardTextAttachment,
-	ClipboardMcpPromptAttachment,
 	ClipboardAttachment,
+	ClipboardMcpPromptAttachment,
+	ClipboardTextAttachment,
+	KeyValuePair,
 	ParsedClipboardContent
 } from './common';
 
 // MCP types
 export type {
 	ClientCapabilities,
-	ServerCapabilities,
-	Implementation,
-	MCPConnectionLog,
-	MCPServerInfo,
-	MCPCapabilitiesInfo,
-	MCPToolInfo,
-	MCPPromptInfo,
-	MCPConnectionDetails,
-	MCPPhaseCallback,
-	MCPConnection,
-	HealthCheckState,
-	HealthCheckParams,
-	MCPServerConfig,
-	MCPClientConfig,
-	MCPServerSettingsEntry,
-	MCPToolCall,
-	OpenAIToolDefinition,
-	ServerStatus,
-	ToolCallParams,
-	ToolExecutionResult,
-	Tool,
-	Prompt,
 	GetPromptResult,
-	PromptMessage,
-	MCPProgressState,
-	MCPResourceAnnotations,
-	MCPResourceIcon,
-	MCPResource,
-	MCPResourceTemplate,
-	MCPTextResourceContent,
+	HealthCheckParams,
+	HealthCheckState,
+	Implementation,
 	MCPBlobResourceContent,
-	MCPResourceContent,
-	MCPReadResourceResult,
-	MCPResourceInfo,
-	MCPResourceTemplateInfo,
 	MCPCachedResource,
+	MCPCapabilitiesInfo,
+	MCPClientConfig,
+	MCPConnection,
+	MCPConnectionDetails,
+	MCPConnectionLog,
+	MCPPhaseCallback,
+	MCPProgressState,
+	MCPPromptInfo,
+	MCPReadResourceResult,
+	MCPResource,
+	MCPResourceAnnotations,
 	MCPResourceAttachment,
+	MCPResourceContent,
+	MCPResourceIcon,
+	MCPResourceInfo,
 	MCPResourceSubscription,
-	MCPServerResources
+	MCPResourceTemplate,
+	MCPResourceTemplateInfo,
+	MCPServerConfig,
+	MCPServerInfo,
+	MCPServerResources,
+	MCPServerSettingsEntry,
+	MCPTextResourceContent,
+	MCPToolCall,
+	MCPToolInfo,
+	OpenAIToolDefinition,
+	Prompt,
+	PromptMessage,
+	ServerCapabilities,
+	ServerStatus,
+	Tool,
+	ToolCallParams,
+	ToolExecutionResult
 } from './mcp';
 
 // Agentic types
 export type {
-	AgenticConfig,
-	AgenticToolCallPayload,
-	AgenticMessage,
 	AgenticAssistantMessage,
-	AgenticToolCallList,
 	AgenticChatCompletionRequest,
-	AgenticSession,
+	AgenticConfig,
 	AgenticFlowCallbacks,
 	AgenticFlowOptions,
 	AgenticFlowParams,
-	AgenticFlowResult
+	AgenticFlowResult,
+	AgenticMessage,
+	AgenticSession,
+	AgenticToolCallList,
+	AgenticToolCallPayload
 } from './agentic';

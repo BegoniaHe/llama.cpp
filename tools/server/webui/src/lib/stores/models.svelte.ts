@@ -1,14 +1,15 @@
-import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import { toast } from 'svelte-sonner';
-import { ServerModelStatus, ModelModality } from '$lib/enums';
+import {
+	FAVORITE_MODELS_LOCALSTORAGE_KEY,
+	MODEL_PROPS_CACHE_MAX_ENTRIES,
+	MODEL_PROPS_CACHE_TTL_MS
+} from '$lib/constants';
+import { ModelModality, ServerModelStatus } from '$lib/enums';
 import { ModelsService, PropsService } from '$lib/services';
 import { serverStore } from '$lib/stores/server.svelte';
+import type { ModelOperationDiagnostic, ModelOperationKind } from '$lib/types/models';
 import { TTLCache } from '$lib/utils';
-import {
-	MODEL_PROPS_CACHE_TTL_MS,
-	MODEL_PROPS_CACHE_MAX_ENTRIES,
-	FAVORITE_MODELS_LOCALSTORAGE_KEY
-} from '$lib/constants';
+import { toast } from 'svelte-sonner';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 /**
  * modelsStore - Reactive store for model management in both MODEL and ROUTER modes
@@ -56,6 +57,8 @@ class ModelsStore {
 
 	private modelUsage = $state<Map<string, SvelteSet<string>>>(new Map());
 	private modelLoadingStates = new SvelteMap<string, boolean>();
+	private modelOperationDiagnostics = new SvelteMap<string, ModelOperationDiagnostic>();
+	private modelFailureReasons = new SvelteMap<string, string>();
 
 	favoriteModelIds = $state<Set<string>>(this.loadFavoritesFromStorage());
 
@@ -102,6 +105,14 @@ class ModelsStore {
 		return Array.from(this.modelLoadingStates.entries())
 			.filter(([, loading]) => loading)
 			.map(([id]) => id);
+	}
+
+	getModelOperationDiagnostic(modelId: string): ModelOperationDiagnostic | null {
+		return this.modelOperationDiagnostics.get(modelId) ?? null;
+	}
+
+	getModelFailureReason(modelId: string): string | null {
+		return this.modelFailureReasons.get(modelId) ?? null;
 	}
 
 	/**
@@ -321,9 +332,14 @@ class ModelsStore {
 	 * This fetches the /models endpoint which returns status info for each model
 	 */
 	async fetchRouterModels(): Promise<void> {
+		return await this.fetchRouterModelsInternal(false);
+	}
+
+	private async fetchRouterModelsInternal(throwOnError: boolean): Promise<void> {
 		try {
 			const response = await ModelsService.listRouter();
 			this.routerModels = response.data;
+			this.syncFailureReasonsFromModels(response.data);
 			await this.fetchModalitiesForLoadedModels();
 
 			const o = this.models.filter((option) => {
@@ -338,6 +354,7 @@ class ModelsStore {
 		} catch (error) {
 			console.warn('Failed to fetch router models:', error);
 			this.routerModels = [];
+			if (throwOnError) throw error;
 		}
 	}
 
@@ -516,10 +533,70 @@ class ModelsStore {
 
 	/** Polling interval in ms for checking model status */
 	private static readonly STATUS_POLL_INTERVAL = 500;
+	private static readonly STATUS_POLL_TIMEOUT_MS = 120000;
+
+	private syncFailureReasonsFromModels(models: ApiModelDataEntry[]): void {
+		for (const model of models) {
+			if (model.status.value === ServerModelStatus.FAILED && model.error) {
+				this.modelFailureReasons.set(model.id, model.error);
+			}
+		}
+	}
+
+	private startModelOperationDiagnostic(
+		modelId: string,
+		operation: ModelOperationKind,
+		expectedStatus: ServerModelStatus
+	): void {
+		const now = Date.now();
+		this.modelOperationDiagnostics.set(modelId, {
+			modelId,
+			operation,
+			expectedStatus,
+			state: 'pending',
+			startedAt: now,
+			deadlineAt: now + ModelsStore.STATUS_POLL_TIMEOUT_MS,
+			attempts: 0,
+			lastObservedStatus: null
+		});
+		this.modelFailureReasons.delete(modelId);
+	}
+
+	private updateModelOperationDiagnostic(
+		modelId: string,
+		updates: Partial<ModelOperationDiagnostic>
+	): void {
+		const existing = this.modelOperationDiagnostics.get(modelId);
+		if (!existing) return;
+
+		this.modelOperationDiagnostics.set(modelId, {
+			...existing,
+			...updates
+		});
+	}
+
+	private completeModelOperationDiagnostic(
+		modelId: string,
+		state: ModelOperationDiagnostic['state'],
+		lastError?: string
+	): void {
+		const existing = this.modelOperationDiagnostics.get(modelId);
+		if (!existing) return;
+
+		this.modelOperationDiagnostics.set(modelId, {
+			...existing,
+			state,
+			lastPolledAt: Date.now(),
+			lastError
+		});
+
+		if (lastError) this.modelFailureReasons.set(modelId, lastError);
+		else if (state === 'success') this.modelFailureReasons.delete(modelId);
+	}
 
 	/**
 	 * Poll for expected model status after load/unload operation.
-	 * Keeps polling indefinitely until the model reaches the expected status or fails.
+	 * Polls until the model reaches the expected status, fails, or times out.
 	 *
 	 * @param modelId - Model identifier to check
 	 * @param expectedStatus - Expected status to wait for
@@ -527,21 +604,49 @@ class ModelsStore {
 	 */
 	private async pollForModelStatus(
 		modelId: string,
-		expectedStatus: ServerModelStatus
+		expectedStatus: ServerModelStatus,
+		operation: ModelOperationKind
 	): Promise<void> {
 		let attempt = 0;
-		while (true) {
-			await this.fetchRouterModels();
+		const deadline = Date.now() + ModelsStore.STATUS_POLL_TIMEOUT_MS;
 
-			const currentStatus = this.getModelStatus(modelId);
+		while (Date.now() <= deadline) {
+			attempt++;
+
+			try {
+				await this.fetchRouterModelsInternal(true);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : 'Failed to refresh model status';
+				this.updateModelOperationDiagnostic(modelId, {
+					attempts: attempt,
+					lastPolledAt: Date.now(),
+					lastError: message
+				});
+
+				await new Promise((resolve) => setTimeout(resolve, ModelsStore.STATUS_POLL_INTERVAL));
+				continue;
+			}
+
+			const model = this.routerModels.find((entry) => entry.id === modelId);
+			const currentStatus = model?.status.value ?? null;
+			this.updateModelOperationDiagnostic(modelId, {
+				attempts: attempt,
+				lastPolledAt: Date.now(),
+				lastObservedStatus: currentStatus,
+				lastError: model?.error
+			});
+
 			if (currentStatus === expectedStatus) {
+				this.completeModelOperationDiagnostic(modelId, 'success');
 				return;
 			}
 
 			if (currentStatus === ServerModelStatus.FAILED) {
-				throw new Error(
-					`Model failed to ${expectedStatus === ServerModelStatus.LOADED ? 'load' : 'unload'}`
-				);
+				const reason =
+					model?.error ||
+					`Model failed to ${expectedStatus === ServerModelStatus.LOADED ? 'load' : 'unload'}`;
+				this.completeModelOperationDiagnostic(modelId, 'failed', reason);
+				throw new Error(reason);
 			}
 
 			if (
@@ -549,12 +654,20 @@ class ModelsStore {
 				currentStatus === ServerModelStatus.UNLOADED &&
 				attempt > 2
 			) {
-				throw new Error('Model was unloaded unexpectedly during loading');
+				const reason = 'Model was unloaded unexpectedly during loading';
+				this.completeModelOperationDiagnostic(modelId, 'failed', reason);
+				throw new Error(reason);
 			}
 
-			attempt++;
 			await new Promise((resolve) => setTimeout(resolve, ModelsStore.STATUS_POLL_INTERVAL));
 		}
+
+		const diagnostic = this.modelOperationDiagnostics.get(modelId);
+		const timeoutReason = `Timed out waiting for model to ${operation} after ${Math.round(
+			ModelsStore.STATUS_POLL_TIMEOUT_MS / 1000
+		)}s${diagnostic?.lastObservedStatus ? ` (last status: ${diagnostic.lastObservedStatus})` : ''}`;
+		this.completeModelOperationDiagnostic(modelId, 'timed-out', timeoutReason);
+		throw new Error(timeoutReason);
 	}
 
 	/**
@@ -570,15 +683,18 @@ class ModelsStore {
 
 		this.modelLoadingStates.set(modelId, true);
 		this.error = null;
+		this.startModelOperationDiagnostic(modelId, 'load', ServerModelStatus.LOADED);
 
 		try {
 			await ModelsService.load(modelId);
-			await this.pollForModelStatus(modelId, ServerModelStatus.LOADED);
+			await this.pollForModelStatus(modelId, ServerModelStatus.LOADED, 'load');
 
 			await this.updateModelModalities(modelId);
 			toast.success(`Model loaded: ${this.toDisplayName(modelId)}`);
 		} catch (error) {
-			this.error = error instanceof Error ? error.message : 'Failed to load model';
+			const message = error instanceof Error ? error.message : 'Failed to load model';
+			this.error = message;
+			this.completeModelOperationDiagnostic(modelId, 'failed', message);
 			toast.error(`Failed to load model: ${this.toDisplayName(modelId)}`);
 			throw error;
 		} finally {
@@ -599,14 +715,17 @@ class ModelsStore {
 
 		this.modelLoadingStates.set(modelId, true);
 		this.error = null;
+		this.startModelOperationDiagnostic(modelId, 'unload', ServerModelStatus.UNLOADED);
 
 		try {
 			await ModelsService.unload(modelId);
 
-			await this.pollForModelStatus(modelId, ServerModelStatus.UNLOADED);
+			await this.pollForModelStatus(modelId, ServerModelStatus.UNLOADED, 'unload');
 			toast.info(`Model unloaded: ${this.toDisplayName(modelId)}`);
 		} catch (error) {
-			this.error = error instanceof Error ? error.message : 'Failed to unload model';
+			const message = error instanceof Error ? error.message : 'Failed to unload model';
+			this.error = message;
+			this.completeModelOperationDiagnostic(modelId, 'failed', message);
 			toast.error(`Failed to unload model: ${this.toDisplayName(modelId)}`);
 			throw error;
 		} finally {
@@ -693,6 +812,8 @@ class ModelsStore {
 		this.selectedModelName = null;
 		this.modelUsage.clear();
 		this.modelLoadingStates.clear();
+		this.modelOperationDiagnostics.clear();
+		this.modelFailureReasons.clear();
 		this.modelPropsCache.clear();
 		this.modelPropsFetching.clear();
 	}
@@ -722,3 +843,6 @@ export const propsCacheVersion = () => modelsStore.propsCacheVersion;
 export const singleModelName = () => modelsStore.singleModelName;
 export const selectedModelContextSize = () => modelsStore.selectedModelContextSize;
 export const favoriteModelIds = () => modelsStore.favoriteModelIds;
+export const modelOperationDiagnostic = (modelId: string) =>
+	modelsStore.getModelOperationDiagnostic(modelId);
+export const modelFailureReason = (modelId: string) => modelsStore.getModelFailureReason(modelId);
