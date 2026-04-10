@@ -76,6 +76,7 @@
 				m.settings_field_paste_long_text_to_file_length_label(),
 			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]:
 				m.settings_field_copy_text_attachments_as_plain_text_label(),
+			[SETTINGS_KEYS.SEND_ON_ENTER]: m.settings_field_send_message_on_enter_label(),
 			[SETTINGS_KEYS.ENABLE_CONTINUE_GENERATION]: m.settings_field_enable_continue_button_label(),
 			[SETTINGS_KEYS.PDF_AS_IMAGE]: m.settings_field_parse_pdf_as_image_label(),
 			[SETTINGS_KEYS.ASK_FOR_TITLE_CONFIRMATION]:
@@ -120,6 +121,8 @@
 				m.settings_field_max_lines_per_tool_preview_label(),
 			[SETTINGS_KEYS.SHOW_TOOL_CALL_IN_PROGRESS]:
 				m.settings_field_show_tool_call_in_progress_label(),
+			[SETTINGS_KEYS.PRE_ENCODE_CONVERSATION]:
+				m.settings_field_pre_fill_kv_cache_after_response_label(),
 			[SETTINGS_KEYS.DISABLE_REASONING_PARSING]:
 				m.settings_field_disable_reasoning_content_parsing_label(),
 			[SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT]:
@@ -140,6 +143,7 @@
 			[SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN]: m.settings_help_paste_long_text_to_file_length(),
 			[SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT]:
 				m.settings_help_copy_text_attachments_as_plain_text(),
+			[SETTINGS_KEYS.SEND_ON_ENTER]: m.settings_help_send_message_on_enter(),
 			[SETTINGS_KEYS.SAMPLERS]: m.settings_help_samplers(),
 			[SETTINGS_KEYS.BACKEND_SAMPLING]: m.settings_help_backend_sampling(),
 			[SETTINGS_KEYS.TEMPERATURE]: m.settings_help_temperature(),
@@ -184,6 +188,7 @@
 			[SETTINGS_KEYS.AGENTIC_MAX_TURNS]: m.settings_help_agentic_loop_max_turns(),
 			[SETTINGS_KEYS.AGENTIC_MAX_TOOL_PREVIEW_LINES]: m.settings_help_max_lines_per_tool_preview(),
 			[SETTINGS_KEYS.SHOW_TOOL_CALL_IN_PROGRESS]: m.settings_help_show_tool_call_in_progress(),
+			[SETTINGS_KEYS.PRE_ENCODE_CONVERSATION]: m.settings_help_pre_fill_kv_cache_after_response(),
 			[SETTINGS_KEYS.ENABLE_CONTINUE_GENERATION]: m.settings_help_enable_continue_button()
 		};
 
@@ -220,6 +225,7 @@
 				createField(SETTINGS_KEYS.API_KEY, SettingsFieldType.INPUT),
 				createField(SETTINGS_KEYS.SYSTEM_MESSAGE, SettingsFieldType.TEXTAREA),
 				createField(SETTINGS_KEYS.PASTE_LONG_TEXT_TO_FILE_LEN, SettingsFieldType.INPUT),
+				createField(SETTINGS_KEYS.SEND_ON_ENTER, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.COPY_TEXT_ATTACHMENTS_AS_PLAIN_TEXT, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.ENABLE_CONTINUE_GENERATION, SettingsFieldType.CHECKBOX, {
 					isExperimental: true
@@ -297,6 +303,7 @@
 			title: SETTINGS_SECTION_TITLES.DEVELOPER,
 			icon: Code,
 			fields: [
+				createField(SETTINGS_KEYS.PRE_ENCODE_CONVERSATION, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.DISABLE_REASONING_PARSING, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.EXCLUDE_REASONING_FROM_CONTEXT, SettingsFieldType.CHECKBOX),
 				createField(SETTINGS_KEYS.SHOW_RAW_OUTPUT_SWITCH, SettingsFieldType.CHECKBOX),
